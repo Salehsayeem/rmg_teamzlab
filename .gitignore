@@ -1,0 +1,33 @@
+# .NET
+bin/
+obj/
+*.user
+*.sln.docstates
+.teststorage/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Worktrees & agent workspaces
+.worktrees/
+.superpowers/sdd/*/probes/
+
+# IDE / OS
+.vs/
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+
+# Test scratch
+*.log
+coverage/
