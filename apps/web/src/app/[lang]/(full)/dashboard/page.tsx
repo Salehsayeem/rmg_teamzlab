@@ -94,12 +94,12 @@ function ErrorState({ title, body, icon }: { title: string; body: string; icon: 
   );
 }
 
-const STATUS_BADGE: Record<string, string> = {
+const STATUS_BADGE: Record<keyof Dict["dashboard"]["status"], string> = {
   confirmed: "bg-lightsuccess",
   inProduction: "bg-lightprimary",
   pending: "bg-lightwarning",
 };
-const STATUS_DOT: Record<string, string> = {
+const STATUS_DOT: Record<keyof Dict["dashboard"]["status"], string> = {
   confirmed: "bg-success",
   inProduction: "bg-primary",
   pending: "bg-warning",

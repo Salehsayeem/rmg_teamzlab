@@ -27,7 +27,7 @@ export function Sidebar({ lang, dict }: { lang: Lang; dict: Dict }) {
       <div className="flex items-center gap-2.5 px-2 pb-5">
         <span
           aria-hidden="true"
-          className="flex size-9 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white"
+          className="flex size-9 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground"
         >
           {dict.app.mark}
         </span>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { getDict } from "@/lib/i18n/getDict";
 
-export const metadata: Metadata = { title: "404" };
+export const metadata: Metadata = { title: getDict("en").notFound.title };
 
 /**
  * Global 404 (experimental.globalNotFound). The root layout lives at
@@ -25,7 +25,7 @@ export default function GlobalNotFound() {
             <a
               href="/en/dashboard"
               hrefLang="en"
-              className="flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              className="flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               {dict.notFound.toEn}
             </a>

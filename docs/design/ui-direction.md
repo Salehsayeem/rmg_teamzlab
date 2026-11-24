@@ -14,7 +14,8 @@ both in the same commit. Token values transcribed from the reference analysis
 | `--popover` (+`-foreground`) | `#ffffff` / `#1c2536` | `#333f55` / `#ffffff` | dropdowns/menus |
 | `--muted` | `#f5f5f5` | `#2a3851` | muted fills, skeletons |
 | `--muted-foreground` | `rgba(90,106,133,.75)` | `#7c8fac` | reference muted text (see §5 contrast note) |
-| `--primary` (+`-foreground`) | `#5d87ff` / `#ffffff` | same | brand: buttons, active nav pill, links, chart-1 |
+| `--primary` (+`-foreground`) | `#5d87ff` / **`#1c2536`** | same (fg identical both themes) | brand: buttons, links, chart-1. Foreground is dark navy, NOT white — white is 3.29:1 on #5d87ff, #1c2536 is 4.66:1 (a11y floor) |
+| `--accent` (+`-foreground`) | `var(--lightprimary)` (16.5% tint) / `var(--primary)` | same | hover/accent fills per reference |
 | `--secondary` (+`-foreground`) | `#49beff` / `#ffffff` | same | brand 2: banners, chart-2 |
 | `--success` | `#13deb9` | same | success states, chart-3 |
 | `--warning` | `#f6b51e` | same | warning states, chart-4 |
@@ -27,11 +28,12 @@ both in the same commit. Token values transcribed from the reference analysis
 | `--chart-1..5` | primary/secondary/success/warning/error | same | series colors |
 | `--sidebar` (+border) | `#ffffff` / `#dfe5ef` | `#1c2536` / `#333f55` | sidebar surface |
 | `--sidebar-foreground` | `#2a3547` | `#7c8fac` | 14px nav/sidebar text; also used for small secondary copy (AA-safe both themes) |
-| `--sidebar-primary` (+`-foreground`) | `#5d87ff` / `#ffffff` | same | active nav pill |
+| `--sidebar-primary` (+`-foreground`) | `#5d87ff` / **`#1c2536`** | same | active nav pill (dark navy text on primary fill, 4.66:1) |
 | `--radius` | `10px` | same | base radius; `rounded-lg` = 10px applied to cards, controls, pills |
 
-Brand, status, tint, chart and ring tokens are theme-invariant; only surfaces,
-text and lines flip. Light/dark = `dark` class on `<html>`, persisted in
+Text on any primary fill is always `#1c2536` (both themes) — never white (a11y
+floor). Brand, status, tint, chart and ring tokens are theme-invariant; only
+surfaces, text and lines flip. Light/dark = `dark` class on `<html>`, persisted in
 localStorage **`rmg-theme`**, seeded pre-paint by an inline script (no flash).
 
 Type: **DM Sans** (`next/font`, variable `--font-dm-sans`) with **Noto Sans
@@ -71,7 +73,17 @@ Bengali** fallback (`--font-noto-bengali`) for bn glyphs. Body 14px/20px.
 | Orders list + capture + confirm | 〃 | FullLayout | later |
 | 404 | global not-found (en copy + both-locale links) | none | done (`global-not-found.tsx`) |
 
-## 5. Accessibility floor
+## 5. Framework decisions
+
+- **R-7 (ratified):** the 404 for unmatched URLs is `app/global-not-found.tsx`
+  enabled by `experimental.globalNotFound` — required because the root layout
+  lives at `app/[lang]/layout.tsx` so `html lang/dir` come from the segment.
+  Valid against Next pinned **exactly 16.4.6**; revisit if `next` is ever bumped.
+- `cacheComponents` + `partialPrefetching` (create-next-app defaults) kept by
+  decision; `dynamicParams` route config is incompatible with them — locale
+  validation is the `isLang()` guard instead.
+
+## 6. Accessibility floor
 
 - Focus rings never removed (`focus-visible:outline-2 outline-ring offset-2`).
 - Text contrast ≥ 4.5:1. Small secondary copy uses `--sidebar-foreground`

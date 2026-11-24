@@ -1,9 +1,10 @@
 "use client";
 
 import { createContext, useCallback, useContext, useSyncExternalStore } from "react";
+import { THEME_STORAGE_KEY, type Theme } from "@/lib/theme";
 
-export type Theme = "light" | "dark";
-export const THEME_STORAGE_KEY = "rmg-theme";
+export { THEME_STORAGE_KEY };
+export type { Theme };
 
 type ThemeContextValue = { theme: Theme; toggle: () => void };
 
