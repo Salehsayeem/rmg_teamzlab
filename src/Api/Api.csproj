@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Database\Database.csproj" />
+    <ProjectReference Include="..\Workers\Workers.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Common\Common.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Tenancy\Tenancy.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Auth\Auth.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Outbox\Outbox.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Audit\Audit.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Idempotency\Idempotency.csproj" />
+    <ProjectReference Include="..\Modules\Identity\Application\Application.csproj" />
+    <ProjectReference Include="..\Modules\Identity\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Modules\Identity\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Modules\Identity\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Merchandising\Application\Application.csproj" />
+    <ProjectReference Include="..\Modules\Merchandising\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Modules\Merchandising\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Modules\Merchandising\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Organization\Application\Application.csproj" />
+    <ProjectReference Include="..\Modules\Organization\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Modules\Organization\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Modules\Organization\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\ProductEngineering\Application\Application.csproj" />
+    <ProjectReference Include="..\Modules\ProductEngineering\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Modules\ProductEngineering\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Modules\ProductEngineering\Infrastructure\Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNetEnv" Version="3.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Rmg.Api</RootNamespace>
+</PropertyGroup>
+
+</Project>

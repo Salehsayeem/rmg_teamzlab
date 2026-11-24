@@ -1,0 +1,89 @@
+<Solution>
+  <Folder Name="/src Api/">
+    <Project Path="src/Api/Api.csproj" />
+  </Folder>
+  <Folder Name="/src BuildingBlocks Audit/">
+    <Project Path="src/BuildingBlocks/Audit/Audit.csproj" />
+  </Folder>
+  <Folder Name="/src BuildingBlocks Auth/">
+    <Project Path="src/BuildingBlocks/Auth/Auth.csproj" />
+  </Folder>
+  <Folder Name="/src BuildingBlocks Common/">
+    <Project Path="src/BuildingBlocks/Common/Common.csproj" />
+  </Folder>
+  <Folder Name="/src BuildingBlocks Idempotency/">
+    <Project Path="src/BuildingBlocks/Idempotency/Idempotency.csproj" />
+  </Folder>
+  <Folder Name="/src BuildingBlocks Outbox/">
+    <Project Path="src/BuildingBlocks/Outbox/Outbox.csproj" />
+  </Folder>
+  <Folder Name="/src BuildingBlocks Tenancy/">
+    <Project Path="src/BuildingBlocks/Tenancy/Tenancy.csproj" />
+  </Folder>
+  <Folder Name="/src Database/">
+    <Project Path="src/Database/Database.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Identity Application/">
+    <Project Path="src/Modules/Identity/Application/Application.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Identity Contracts/">
+    <Project Path="src/Modules/Identity/Contracts/Contracts.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Identity Domain/">
+    <Project Path="src/Modules/Identity/Domain/Domain.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Identity Infrastructure/">
+    <Project Path="src/Modules/Identity/Infrastructure/Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Merchandising Application/">
+    <Project Path="src/Modules/Merchandising/Application/Application.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Merchandising Contracts/">
+    <Project Path="src/Modules/Merchandising/Contracts/Contracts.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Merchandising Domain/">
+    <Project Path="src/Modules/Merchandising/Domain/Domain.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Merchandising Infrastructure/">
+    <Project Path="src/Modules/Merchandising/Infrastructure/Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Organization Application/">
+    <Project Path="src/Modules/Organization/Application/Application.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Organization Contracts/">
+    <Project Path="src/Modules/Organization/Contracts/Contracts.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Organization Domain/">
+    <Project Path="src/Modules/Organization/Domain/Domain.csproj" />
+  </Folder>
+  <Folder Name="/src Modules Organization Infrastructure/">
+    <Project Path="src/Modules/Organization/Infrastructure/Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src Modules ProductEngineering Application/">
+    <Project Path="src/Modules/ProductEngineering/Application/Application.csproj" />
+  </Folder>
+  <Folder Name="/src Modules ProductEngineering Contracts/">
+    <Project Path="src/Modules/ProductEngineering/Contracts/Contracts.csproj" />
+  </Folder>
+  <Folder Name="/src Modules ProductEngineering Domain/">
+    <Project Path="src/Modules/ProductEngineering/Domain/Domain.csproj" />
+  </Folder>
+  <Folder Name="/src Modules ProductEngineering Infrastructure/">
+    <Project Path="src/Modules/ProductEngineering/Infrastructure/Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src Workers/">
+    <Project Path="src/Workers/Workers.csproj" />
+  </Folder>
+  <Folder Name="/tests Contract/">
+    <Project Path="tests/Contract/Rmg.ContractTests.csproj" />
+  </Folder>
+  <Folder Name="/tests Integration/">
+    <Project Path="tests/Integration/Rmg.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/tests Security/">
+    <Project Path="tests/Security/Rmg.SecurityTests.csproj" />
+  </Folder>
+  <Folder Name="/tests Unit/">
+    <Project Path="tests/Unit/Rmg.UnitTests.csproj" />
+  </Folder>
+</Solution>

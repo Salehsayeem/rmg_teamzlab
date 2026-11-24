@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks\Common\Common.csproj" />
+    <ProjectReference Include="..\Modules\Identity\Application\Application.csproj" />
+    <ProjectReference Include="..\Modules\Identity\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Modules\Identity\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Modules\Identity\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Merchandising\Application\Application.csproj" />
+    <ProjectReference Include="..\Modules\Merchandising\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Modules\Merchandising\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Modules\Merchandising\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\Organization\Application\Application.csproj" />
+    <ProjectReference Include="..\Modules\Organization\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Modules\Organization\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Modules\Organization\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Modules\ProductEngineering\Application\Application.csproj" />
+    <ProjectReference Include="..\Modules\ProductEngineering\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Modules\ProductEngineering\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Modules\ProductEngineering\Infrastructure\Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNetEnv" Version="3.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Rmg.Database</RootNamespace>
+</PropertyGroup>
+
+</Project>
