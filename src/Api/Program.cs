@@ -12,6 +12,8 @@ using Rmg.BuildingBlocks.Common;
 using Rmg.BuildingBlocks.Outbox;
 using Rmg.BuildingBlocks.Tenancy;
 using Rmg.Database;
+using Rmg.Modules.Identity.Infrastructure;
+using Rmg.Modules.Organization.Infrastructure;
 
 // Local config comes from the gitignored .env (connection string, JWT key, seed password, ports).
 // Walked up from cwd because dotnet run / IIS Express don't guarantee cwd = repo root.
@@ -87,6 +89,11 @@ builder.Services.AddDbContext<TenantScopedDbContext>(o =>
 // writers, probes and the [Idempotent] filter resolve the ambient context by its base type —
 // forwarded to the same scoped, tenant-filtered instance (one SaveChanges = atomic business+outbox).
 builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<TenantScopedDbContext>());
+
+// ── W1 merge: module DI composition roots — controllers receive ctor-injected module services
+// (replaces FacilityConfig.CreateApi and IamController's per-request property getters). ──
+builder.Services.AddOrganizationApi();
+builder.Services.AddIamApi();
 
 // ── Controller seam (controller-authored, P-12): module endpoints are MVC controllers in
 // src/Api/Controllers (plan convention) — discovered from the entry assembly. ──
