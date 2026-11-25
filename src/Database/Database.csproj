@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks\Auth\Auth.csproj" />
     <ProjectReference Include="..\BuildingBlocks\Common\Common.csproj" />
     <ProjectReference Include="..\BuildingBlocks\Outbox\Outbox.csproj" />
     <ProjectReference Include="..\BuildingBlocks\Audit\Audit.csproj" />
