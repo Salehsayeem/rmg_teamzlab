@@ -51,8 +51,9 @@ public class TenantEntityConfiguration<TEntity> : IEntityTypeConfiguration<TEnti
 
         // Fail-closed default: EF constantizes query filters — a plain static/ambient read here would be
         // baked into the cached query plan at first execution (verified empirically), so a tenant filter
-        // cannot live on a static. This null filter matches no rows; TenantScopedDbContext (Database
-        // project) replaces it with the context-rooted filter that re-evaluates per request.
-        b.HasQueryFilter(e => e.TenantId == (Guid?)null);
+        // cannot live on a static. Matches no rows, so direct RmgDbContext users see nothing rather than
+        // another tenant's data; TenantScopedDbContext (Database project) replaces this with the
+        // context-rooted filter that re-evaluates per request.
+        b.HasQueryFilter(_ => false);
     }
 }

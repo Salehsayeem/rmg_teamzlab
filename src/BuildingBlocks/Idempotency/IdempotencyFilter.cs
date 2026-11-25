@@ -13,7 +13,13 @@ namespace Rmg.BuildingBlocks.Idempotency;
 /// (tenant, endpoint, sha256(key)). Hit with a matching request hash → the stored response is replayed
 /// verbatim with the Idempotent-Replay: true header; hit with a mismatched hash → 422
 /// IDEMPOTENCY_KEY_REUSED; miss → the endpoint executes and its response is stored, 2xx only.
-/// No header, non-POST, anonymous, or unmarked endpoints pass straight through.</summary>
+/// No header, non-POST, anonymous, or unmarked endpoints pass straight through.
+///
+/// Claim-first: a concurrent racer cannot double-execute the write — the owner inserts a Pending claim
+/// (committed before the endpoint runs) and the racer's insert violates the (tenant, endpoint, key_hash)
+/// key, so it is refused 409 IDEMPOTENCY_KEY_IN_FLIGHT before reaching the handler. A crash mid-flight
+/// strands the claim as Pending (pilot: no TTL sweeper); non-2xx/failed executions release the claim so
+/// a genuine retry can proceed.</summary>
 public sealed class IdempotencyFilter : IEndpointFilter
 {
     public const string ReplayHeaderName = "Idempotent-Replay";
@@ -21,6 +27,13 @@ public sealed class IdempotencyFilter : IEndpointFilter
     /// <summary>HttpContext.Items key under which the Api pipeline guard middleware hands the filter the
     /// raw request body it buffered (see Program.cs).</summary>
     public const string RequestBodyItemKey = "idempotency:requestBody";
+
+    /// <summary>ResponseStatus of a claim whose owner is still executing; jsonb cannot store an empty
+    /// string, so empty 2xx bodies and pending claims are both stored as JSON null (distinguished by
+    /// status — replay only ever serves completed 2xx claims).</summary>
+    private const int PendingStatus = 0;
+    private const string NullJson = "null";
+    private const string InFlightCode = "IDEMPOTENCY_KEY_IN_FLIGHT";
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
@@ -52,7 +65,32 @@ public sealed class IdempotencyFilter : IEndpointFilter
             if (stored.RequestHash != requestHash)
                 throw new BusinessRuleProblem("IDEMPOTENCY_KEY_REUSED",
                     "This Idempotency-Key was already used with a different request body.");
+            if (!IsCompleted(stored))
+                throw new RmgProblemException(InFlightCode, "Conflict.", 409,
+                    Detail: "An identical request is already in flight.");
             return new ReplayResult(stored.ResponseStatus, stored.ResponseJson);
+        }
+
+        // Claim the key atomically BEFORE executing: the unique key turns a racing racer's insert into a
+        // violation, so it is refused before it can run the write (no 500-after-commit lost updates).
+        records.Add(new IdempotencyRecord
+        {
+            TenantId = tenantId.Value,
+            Endpoint = endpoint,
+            KeyHash = keyHash,
+            RequestHash = requestHash,
+            ResponseStatus = PendingStatus,
+            ResponseJson = NullJson,
+            CreatedAtUtc = DateTime.UtcNow,
+        });
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            throw new RmgProblemException(InFlightCode, "Conflict.", 409,
+                Detail: "An identical request is already in flight.");
         }
 
         // Capture the endpoint's response bytes so a 2xx can be stored, then re-emit them untouched.
@@ -73,24 +111,28 @@ public sealed class IdempotencyFilter : IEndpointFilter
                 result = Results.Empty;
             }
         }
+        catch
+        {
+            await ReleaseClaimAsync(db, tenantId.Value, endpoint, keyHash);
+            throw;
+        }
         finally
         {
             http.Response.Body = original;
         }
 
-        if (http.Response.StatusCode is >= 200 and < 300 && buffer.Length > 0)
+        if (http.Response.StatusCode is >= 200 and < 300)
         {
-            records.Add(new IdempotencyRecord
-            {
-                TenantId = tenantId.Value,
-                Endpoint = endpoint,
-                KeyHash = keyHash,
-                RequestHash = requestHash,
-                ResponseStatus = http.Response.StatusCode,
-                ResponseJson = Encoding.UTF8.GetString(buffer.ToArray()),
-                CreatedAtUtc = DateTime.UtcNow,
-            });
+            var claim = await records.SingleAsync(r =>
+                r.TenantId == tenantId && r.Endpoint == endpoint && r.KeyHash == keyHash);
+            var responseBody = Encoding.UTF8.GetString(buffer.ToArray());
+            claim.ResponseStatus = http.Response.StatusCode;
+            claim.ResponseJson = responseBody.Length == 0 ? NullJson : responseBody;
             await db.SaveChangesAsync();
+        }
+        else
+        {
+            await ReleaseClaimAsync(db, tenantId.Value, endpoint, keyHash);
         }
 
         if (buffer.Length > 0)
@@ -98,17 +140,37 @@ public sealed class IdempotencyFilter : IEndpointFilter
         return result;
     }
 
+    private static bool IsCompleted(IdempotencyRecord record) => record.ResponseStatus is >= 200 and < 300;
+
+    // Raw SQL: the cleanup path also runs after a failed endpoint SaveChanges, whose poisoned tracked
+    // entries would make another SaveChangesAsync re-fail before it ever reached the claim delete.
+    private static async Task ReleaseClaimAsync(DbContext db, Guid tenantId, string endpoint, string keyHash)
+    {
+        try
+        {
+            await db.Database.ExecuteSqlInterpolatedAsync(
+                $"DELETE FROM iam.idempotency_record WHERE tenant_id = {tenantId} AND endpoint = {endpoint} AND key_hash = {keyHash}");
+        }
+        catch
+        {
+            // The claim may be left Pending; the client must see the original failure regardless.
+        }
+    }
+
     private static string Sha256(string value) =>
         Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
 
-    /// <summary>Replays a stored response verbatim, flagged with Idempotent-Replay: true.</summary>
+    /// <summary>Replays a stored response verbatim, flagged with Idempotent-Replay: true. Empty bodies
+    /// (stored as the jsonb NullJson placeholder) replay as a bodyless response with the same status.</summary>
     private sealed class ReplayResult(int status, string json) : IResult
     {
         public async Task ExecuteAsync(HttpContext http)
         {
             http.Response.StatusCode = status;
-            http.Response.ContentType = "application/json";
             http.Response.Headers[ReplayHeaderName] = "true";
+            if (json.Length == 0 || json == NullJson)
+                return;
+            http.Response.ContentType = "application/json";
             await http.Response.WriteAsync(json);
         }
     }

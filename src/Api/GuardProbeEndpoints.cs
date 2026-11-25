@@ -19,6 +19,7 @@ public static class GuardProbeEndpoints
         app.MapGet("/guardz/probe/facility", FacilityList);
         app.MapPost("/guardz/probe/facility", FacilityCreate).AddEndpointFilter<IdempotencyFilter>();
         app.MapPost("/guardz/probe/facility/{id}/rename", FacilityRename);
+        app.MapPost("/guardz/probe/facility/{id}/touch", FacilityTouch).AddEndpointFilter<IdempotencyFilter>();
 
         [RequirePerm("org.read")]
         static async Task<IResult> FacilityById(Guid id, TenantScopedDbContext db)
@@ -91,9 +92,25 @@ public static class GuardProbeEndpoints
             return Results.Json(Envelope<object>.Of(Dto(facility)));
         }
 
+        // Deliberately empty-body 200 with a per-execution side effect: exercises storing/replaying a
+        // bodyless 2xx (the second call must not bump the revision again).
+        [Idempotent]
+        [RequirePerm("org.facility.write")]
+        static async Task<IResult> FacilityTouch(Guid id, TouchFacility body, TenantScopedDbContext db)
+        {
+            var facility = await db.Set<Facility>().SingleOrDefaultAsync(f => f.Id == id)
+                ?? throw new NotFoundProblem();
+            if (facility.Revision != body.Revision)
+                throw new BusinessRuleProblem("STALE_REVISION", $"expected revision {body.Revision}, current {facility.Revision}");
+            facility.Revision++;
+            await db.SaveChangesAsync();
+            return Results.Empty;
+        }
+
         static object Dto(Facility f) => new { f.Id, f.TenantId, f.Code, f.Name, f.Revision };
     }
 
     private sealed record CreateFacility(Guid LegalEntityId, string Code, string Name);
     private sealed record RenameFacility(string Name, int Revision);
+    private sealed record TouchFacility(int Revision);
 }
