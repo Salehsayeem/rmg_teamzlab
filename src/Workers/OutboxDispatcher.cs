@@ -23,6 +23,11 @@ public sealed class OutboxDispatcher(
                 await Task.Delay(PollInterval, stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { }
+            catch (Exception ex)
+            {
+                // a failed tick (poll query / SaveChanges transient error) must not stop the host
+                log.LogError(ex, "Outbox dispatch tick failed; retrying next poll");
+            }
         }
     }
 
@@ -48,6 +53,12 @@ public sealed class OutboxDispatcher(
                 message.Status = "Processed";
                 log.LogInformation("Outbox delivered {EventType} {EventId} for aggregate {AggregateId}",
                     message.EventType, message.Id, message.AggregateId);
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                // shutdown mid-delivery, not a delivery failure — leave attempts untouched; the
+                // rethrow exits the batch before SaveChanges and ExecuteAsync exits cleanly
+                throw;
             }
             catch (Exception ex)
             {

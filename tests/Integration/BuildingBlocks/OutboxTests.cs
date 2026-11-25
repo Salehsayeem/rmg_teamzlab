@@ -51,7 +51,7 @@ public class OutboxTests : IntegrationTestBase
         // -- dispatcher: one due Pending row is delivered and marked Processed
         var delivered = new List<Guid>();
         var logger = new ListLogger();
-        await using (var provider = BuildProvider(msg =>
+        await using (var provider = BuildProvider((msg, _) =>
                      {
                          delivered.Add(msg.Id);
                          return Task.CompletedTask;
@@ -69,7 +69,7 @@ public class OutboxTests : IntegrationTestBase
         Db.AddRange(reschedule, deadLetter);
         await Db.SaveChangesAsync();
 
-        await using (var provider = BuildProvider(_ => throw new InvalidOperationException("pilot delivery down")))
+        await using (var provider = BuildProvider((_, _) => throw new InvalidOperationException("pilot delivery down")))
         {
             await RunBatch(provider, logger);
         }
@@ -88,14 +88,83 @@ public class OutboxTests : IntegrationTestBase
         Assert.DoesNotContain(logger.Messages, m => m.Contains("OUTBOX_DEAD_LETTER") && m.Contains("retry.me"));
     }
 
-    private async Task RunBatch(ServiceProvider provider, ListLogger logger)
+    // Resilience: a failed tick charges exactly one attempt and leaves the row recoverable — a later
+    // tick delivers it; shutdown cancellation mid-delivery must not charge an attempt at all.
+    [Fact]
+    public async Task Dispatcher_FailedTick_LeavesMessageRecoverable()
+    {
+        var tenant = new TenantContext();
+        tenant.Set(Guid.NewGuid(), null, Guid.NewGuid());
+        var logger = new ListLogger();
+
+        var writer = new OutboxWriter(Db, tenant, httpAccessor: null);
+        await writer.EnqueueAsync("retry.once", new { N = 1 }, Guid.NewGuid());
+        await Db.SaveChangesAsync();
+
+        var calls = 0;
+        await using (var provider = BuildProvider((_, _) => ++calls == 1
+                     ? throw new InvalidOperationException("first delivery fails")
+                     : Task.CompletedTask))
+        {
+            await RunBatch(provider, logger); // tick 1: delivery fails
+
+            await using (var afterFailDb = FreshContext())
+            {
+                var afterFail = await afterFailDb.Set<OutboxMessage>().SingleAsync();
+                Assert.Equal(1, afterFail.Attempts);
+                Assert.Equal("Pending", afterFail.Status);
+            }
+
+            // simulate the backoff wait passing: make the rescheduled row due again
+            var tracked = await Db.Set<OutboxMessage>().SingleAsync();
+            tracked.NextAttemptAtUtc = DateTime.UtcNow.AddSeconds(-1);
+            await Db.SaveChangesAsync();
+
+            await RunBatch(provider, logger); // tick 2: same dispatcher keeps working
+        }
+
+        await using (var recoveredDb = FreshContext())
+        {
+            var recovered = await recoveredDb.Set<OutboxMessage>().SingleAsync();
+            Assert.Equal("Processed", recovered.Status);
+            Assert.Equal(1, recovered.Attempts); // the failure cost exactly one attempt
+        }
+
+        // shutdown mid-delivery: cancellation is not a delivery failure — no attempt charged
+        var inFlight = PendingRow("shutdown.midflight", attempts: 0);
+        Db.Add(inFlight);
+        await Db.SaveChangesAsync();
+
+        using var cts = new CancellationTokenSource();
+        await using (var provider = BuildProvider(async (_, ct) =>
+                     {
+                         await cts.CancelAsync();
+                         throw new OperationCanceledException(ct);
+                     }))
+        {
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(
+                () => RunBatch(provider, logger, cts.Token));
+        }
+
+        await using (var untouchedDb = FreshContext())
+        {
+            var untouched = await untouchedDb.Set<OutboxMessage>().SingleAsync(m => m.Id == inFlight.Id);
+            Assert.Equal(0, untouched.Attempts);
+            Assert.Equal("Pending", untouched.Status);
+        }
+
+        // and it is not reported as a delivery failure
+        Assert.DoesNotContain(logger.Messages, m => m.Contains("shutdown.midflight"));
+    }
+
+    private async Task RunBatch(ServiceProvider provider, ListLogger logger, CancellationToken ct = default)
     {
         var dispatcher = new OutboxDispatcher(
             provider.GetRequiredService<IServiceScopeFactory>(), logger);
-        await dispatcher.ProcessDueBatchAsync();
+        await dispatcher.ProcessDueBatchAsync(ct);
     }
 
-    private ServiceProvider BuildProvider(Func<OutboxMessage, Task> onDeliver)
+    private ServiceProvider BuildProvider(Func<OutboxMessage, CancellationToken, Task> onDeliver)
     {
         var services = new ServiceCollection();
         services.AddDbContext<RmgDbContext>(o => o.UseNpgsql(ConnectionString));
@@ -124,10 +193,10 @@ public class OutboxTests : IntegrationTestBase
         NextAttemptAtUtc = DateTime.UtcNow.AddSeconds(-1),
     };
 
-    private sealed class StubDelivery(Func<OutboxMessage, Task> onDeliver) : IOutboxDelivery
+    private sealed class StubDelivery(Func<OutboxMessage, CancellationToken, Task> onDeliver) : IOutboxDelivery
     {
         public Task DeliverAsync(OutboxMessage message, CancellationToken cancellationToken = default)
-            => onDeliver(message);
+            => onDeliver(message, cancellationToken);
     }
 
     private sealed class ListLogger : ILogger<OutboxDispatcher>
