@@ -88,6 +88,10 @@ builder.Services.AddDbContext<TenantScopedDbContext>(o =>
 // forwarded to the same scoped, tenant-filtered instance (one SaveChanges = atomic business+outbox).
 builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<TenantScopedDbContext>());
 
+// ── Controller seam (controller-authored, P-12): module endpoints are MVC controllers in
+// src/Api/Controllers (plan convention) — discovered from the entry assembly. ──
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -101,6 +105,7 @@ app.MapGet("/", () => "Hello World!");
 app.MapDevProbeEndpoints();
 app.MapAuthEndpoints();
 app.MapAuthProbeEndpoints();
+app.MapControllers();
 
 // ── Task 7 (guard): TenantEntity's query filter reads the ambient tenant — mirror it from
 // ITenantContext once TenantResolutionMiddleware has populated it — plus the guard probe endpoints.
