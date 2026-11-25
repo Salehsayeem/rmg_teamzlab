@@ -30,16 +30,25 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         }
         catch
         {
-            await _db.DisposeAsync();
+            await TeardownAsync();
             throw;
         }
     }
 
-    public async Task DisposeAsync()
+    public Task DisposeAsync() => TeardownAsync();
+
+    // Best-effort, null-safe: every resource is disposed even if an earlier one throws (a WAF whose hosted app
+    // faulted throws on Dispose), so the scratch-DB drop always runs and cannot be masked by an NRE.
+    private async Task TeardownAsync()
     {
-        await Db.DisposeAsync();
-        await _factory.DisposeAsync();
-        await _db.DisposeAsync();
+        if (Db is not null)
+            try { await Db.DisposeAsync(); }
+            catch { /* secondary teardown failure */ }
+        if (_factory is not null)
+            try { await _factory.DisposeAsync(); }
+            catch { /* secondary teardown failure */ }
+        if (_db is not null)
+            await _db.DisposeAsync();
     }
 
     // Admin connection string from env or the repo-root .env (DotNetEnv sets it into the process environment).
