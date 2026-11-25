@@ -600,6 +600,91 @@ namespace Rmg.Database.Migrations
                     b.ToTable("tenant_locale_policy", "org");
                 });
 
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.Material", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BaseUomCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("base_uom_code");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Revision")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("revision");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BaseUomCode");
+
+                    b.HasIndex("TenantId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("material", "pdm");
+                });
+
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.Uom", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("uom", "pdm");
+                });
+
             modelBuilder.Entity("Rmg.Modules.Identity.Domain.RolePermission", b =>
                 {
                     b.HasOne("Rmg.Modules.Identity.Domain.Permission", null)
@@ -656,6 +741,15 @@ namespace Rmg.Database.Migrations
                     b.HasOne("Rmg.Modules.Organization.Domain.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.Material", b =>
+                {
+                    b.HasOne("Rmg.Modules.ProductEngineering.Domain.Uom", null)
+                        .WithMany()
+                        .HasForeignKey("BaseUomCode")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

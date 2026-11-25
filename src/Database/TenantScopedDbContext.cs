@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Rmg.BuildingBlocks.Tenancy;
 using Rmg.Modules.Identity.Domain;
 using Rmg.Modules.Organization.Domain;
+using Rmg.Modules.ProductEngineering.Domain;
 
 namespace Rmg.Database;
 
@@ -29,5 +30,8 @@ public class TenantScopedDbContext(DbContextOptions<RmgDbContext> options) : Rmg
         // test harness query users on the base RmgDbContext — before any tenant is known — and must
         // keep seeing them. Controller-side user reads run here, where the filter closes the leak.
         modelBuilder.Entity<AppUser>().HasQueryFilter(u => u.TenantId == AmbientTenantId);
+
+        // Task 11 (PDM): material is tenant-pinned on this context, same as Facility above.
+        modelBuilder.Entity<Material>().HasQueryFilter(m => m.TenantId == AmbientTenantId);
     }
 }

@@ -4,6 +4,7 @@ using Rmg.BuildingBlocks.Idempotency;
 using Rmg.BuildingBlocks.Outbox;
 using Rmg.Modules.Identity.Infrastructure;
 using Rmg.Modules.Organization.Infrastructure;
+using Rmg.Modules.ProductEngineering.Infrastructure;
 
 namespace Rmg.Database;
 
@@ -19,5 +20,7 @@ public class RmgDbContext(DbContextOptions<RmgDbContext> options) : DbContext(op
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OutboxMessageConfiguration).Assembly);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuditEventConfiguration).Assembly);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(IdempotencyRecordConfiguration).Assembly);
+        // Task 11 (PDM): wired additively by its own task — controllers/configurations in module Infrastructure.
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(MaterialConfiguration).Assembly);
     }
 }

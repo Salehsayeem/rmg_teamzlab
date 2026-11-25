@@ -14,6 +14,7 @@ using Rmg.BuildingBlocks.Tenancy;
 using Rmg.Database;
 using Rmg.Modules.Identity.Infrastructure;
 using Rmg.Modules.Organization.Infrastructure;
+using Rmg.Modules.ProductEngineering.Infrastructure;
 
 // Local config comes from the gitignored .env (connection string, JWT key, seed password, ports).
 // Walked up from cwd because dotnet run / IIS Express don't guarantee cwd = repo root.
@@ -94,6 +95,11 @@ builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<TenantScopedDb
 // (replaces FacilityConfig.CreateApi and IamController's per-request property getters). ──
 builder.Services.AddOrganizationApi();
 builder.Services.AddIamApi();
+
+// BEGIN Task 11 (PDM): material master + uom — controllers receive ctor-injected module services
+// (mirrors the W1 module composition blocks above).
+builder.Services.AddPdmApi();
+// END Task 11
 
 // ── Controller seam (controller-authored, P-12): module endpoints are MVC controllers in
 // src/Api/Controllers (plan convention) — discovered from the entry assembly. ──
