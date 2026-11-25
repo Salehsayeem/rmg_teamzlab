@@ -12,7 +12,7 @@ using Rmg.Database;
 namespace Rmg.Database.Migrations
 {
     [DbContext(typeof(RmgDbContext))]
-    [Migration("001_Foundation")]
+    [Migration("20261125000000_001_Foundation")] // P-11: EF 10 tooling requires the timestamp-prefixed id format (register suffix unchanged)
     partial class _001_Foundation
     {
         /// <inheritdoc />
