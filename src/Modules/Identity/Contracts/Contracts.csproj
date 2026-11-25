@@ -10,6 +10,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Rmg.Modules.Identity.Contracts</RootNamespace>
+    <AssemblyName>Rmg.Modules.Identity.Contracts</AssemblyName>
 </PropertyGroup>
 
 </Project>

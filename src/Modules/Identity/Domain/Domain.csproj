@@ -10,6 +10,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Rmg.Modules.Identity.Domain</RootNamespace>
+    <AssemblyName>Rmg.Modules.Identity.Domain</AssemblyName>
 </PropertyGroup>
 
 </Project>

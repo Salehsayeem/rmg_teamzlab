@@ -12,6 +12,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Rmg.Modules.ProductEngineering.Application</RootNamespace>
+    <AssemblyName>Rmg.Modules.ProductEngineering.Application</AssemblyName>
 </PropertyGroup>
 
 </Project>

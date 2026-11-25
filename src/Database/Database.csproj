@@ -2,6 +2,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BuildingBlocks\Common\Common.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Outbox\Outbox.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Audit\Audit.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Idempotency\Idempotency.csproj" />
     <ProjectReference Include="..\Modules\Identity\Application\Application.csproj" />
     <ProjectReference Include="..\Modules\Identity\Contracts\Contracts.csproj" />
     <ProjectReference Include="..\Modules\Identity\Domain\Domain.csproj" />
@@ -34,6 +37,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Rmg.Database</RootNamespace>
-</PropertyGroup>
+    <!-- Runnable so `dotnet run (project src/Database, arg reset)` works; referencing it stays fine. -->
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- PasswordHasher (seed) lives in the ASP.NET Core shared framework. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
 </Project>
