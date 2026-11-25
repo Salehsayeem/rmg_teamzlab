@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Rmg.BuildingBlocks.Tenancy;
 using Rmg.Modules.Organization.Domain;
 
 namespace Rmg.Modules.Organization.Infrastructure;
 
-// Baseline columns are mapped inline per entity (P-2); the shared TenantEntity base arrives in Task 7.
+// Baseline columns are mapped inline per entity (P-2); facility alone rides the shared TenantEntity
+// base (P-10).
 public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
 {
     public void Configure(EntityTypeBuilder<Tenant> b)
@@ -44,13 +46,13 @@ public sealed class LegalEntityConfiguration : IEntityTypeConfiguration<LegalEnt
     }
 }
 
-public sealed class FacilityConfiguration : IEntityTypeConfiguration<Facility>
+// Facility rides the shared TenantEntity baseline (P-10); only its own columns and relations remain here.
+public sealed class FacilityConfiguration : TenantEntityConfiguration<Facility>
 {
-    public void Configure(EntityTypeBuilder<Facility> b)
+    public override void Configure(EntityTypeBuilder<Facility> b)
     {
+        base.Configure(b);
         b.ToTable("facility", "org");
-        b.Property(x => x.Id).HasColumnName("id");
-        b.Property(x => x.TenantId).HasColumnName("tenant_id");
         b.Property(x => x.LegalEntityId).HasColumnName("legal_entity_id");
         b.Property(x => x.Code).HasColumnName("code");
         b.Property(x => x.Name).HasColumnName("name");
@@ -62,11 +64,6 @@ public sealed class FacilityConfiguration : IEntityTypeConfiguration<Facility>
         b.HasOne<LegalEntity>().WithMany()
             .HasForeignKey(x => new { x.TenantId, x.LegalEntityId })
             .HasPrincipalKey(x => new { x.TenantId, x.Id });
-        b.Property(x => x.Revision).HasColumnName("revision").HasDefaultValue(1);
-        b.Property(x => x.CreatedAtUtc).HasColumnName("created_at_utc");
-        b.Property(x => x.CreatedBy).HasColumnName("created_by");
-        b.Property(x => x.UpdatedAtUtc).HasColumnName("updated_at_utc");
-        b.Property(x => x.UpdatedBy).HasColumnName("updated_by");
     }
 }
 

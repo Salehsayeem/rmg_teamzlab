@@ -45,6 +45,8 @@
     <ProjectReference Include="..\..\src\Modules\ProductEngineering\Contracts\Contracts.csproj" />
     <ProjectReference Include="..\..\src\Modules\ProductEngineering\Domain\Domain.csproj" />
     <ProjectReference Include="..\..\src\Modules\ProductEngineering\Infrastructure\Infrastructure.csproj" />
+    <!-- Shares the IntegrationTestBase harness + two-tenant seed; this project's tests stay the only ones discovered. -->
+    <ProjectReference Include="..\Integration\Rmg.IntegrationTests.csproj" />
   </ItemGroup>
 
 </Project>

@@ -71,6 +71,13 @@ builder.Services
 builder.Services.AddAuthorization();
 // ───────────────────────────────────────────────────────────────────────────────────────────
 
+// ── Task 7 (guard): tenant-scoped context (carries the TenantEntity query filter) for the guard
+// probes; the [Idempotent] filter stores/replays via the context's base type (the Idempotency project
+// cannot see the Database project), forwarded to the same scoped instance. ──
+builder.Services.AddDbContext<TenantScopedDbContext>(o =>
+    o.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<TenantScopedDbContext>());
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -84,6 +91,27 @@ app.MapGet("/", () => "Hello World!");
 app.MapDevProbeEndpoints();
 app.MapAuthEndpoints();
 app.MapAuthProbeEndpoints();
+
+// ── Task 7 (guard): TenantEntity's query filter reads the ambient tenant — mirror it from
+// ITenantContext once TenantResolutionMiddleware has populated it — plus the guard probe endpoints.
+// Keyed POST bodies are buffered here because the minimal-API pipeline drains the request body
+// before [Idempotent] filters run; the filter hashes the captured bytes. ──
+app.Use(async (context, next) =>
+{
+    TenantEntity.SetAmbientTenant(context.RequestServices.GetRequiredService<ITenantContext>().TenantId);
+
+    if (HttpMethods.IsPost(context.Request.Method)
+        && context.Request.Headers.ContainsKey("Idempotency-Key"))
+    {
+        context.Request.EnableBuffering();
+        using var reader = new StreamReader(context.Request.Body, Encoding.UTF8, leaveOpen: true);
+        context.Items[Rmg.BuildingBlocks.Idempotency.IdempotencyFilter.RequestBodyItemKey] = await reader.ReadToEndAsync();
+        context.Request.Body.Position = 0;
+    }
+
+    await next(context);
+});
+app.MapGuardProbeEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
