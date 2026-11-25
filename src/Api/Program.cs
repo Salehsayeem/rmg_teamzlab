@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Rmg.Api;
+using Rmg.BuildingBlocks.Audit;
 using Rmg.BuildingBlocks.Auth;
 using Rmg.BuildingBlocks.Common;
+using Rmg.BuildingBlocks.Outbox;
 using Rmg.BuildingBlocks.Tenancy;
 using Rmg.Database;
 
@@ -70,6 +72,15 @@ builder.Services
     });
 builder.Services.AddAuthorization();
 // ───────────────────────────────────────────────────────────────────────────────────────────
+
+// BEGIN T6 (additive block): audit + outbox writers resolve the request's DbContext/tenant context.
+// AddDbContext / ITenantContext deduped at merge (EF TryAdd is first-wins).
+// writers take the ambient DbContext (base type) — forward to the same scoped RmgDbContext instance
+builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<RmgDbContext>());
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuditWriter, AuditWriter>();
+builder.Services.AddScoped<IOutboxWriter, OutboxWriter>();
+// END T6
 
 var app = builder.Build();
 
