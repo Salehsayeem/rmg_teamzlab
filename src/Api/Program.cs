@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Rmg.Api;
+using Rmg.BuildingBlocks.Audit;
 using Rmg.BuildingBlocks.Common;
+using Rmg.BuildingBlocks.Outbox;
+using Rmg.BuildingBlocks.Tenancy;
 using Rmg.Database;
 
 // Local config comes from the gitignored .env (connection string, JWT key, seed password, ports).
@@ -16,6 +19,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ProblemExceptionHandler>();
+
+// BEGIN T6 (additive block): audit + outbox writers resolve the request's DbContext/tenant context.
+builder.Services.AddDbContext<RmgDbContext>(o =>
+    o.UseNpgsql(builder.Configuration.GetConnectionString("Default")
+        ?? throw new InvalidOperationException("ConnectionStrings:Default is not configured.")));
+// writers take the ambient DbContext (base type) — forward to the same scoped RmgDbContext instance
+builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<RmgDbContext>());
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, TenantContext>();
+builder.Services.AddScoped<IAuditWriter, AuditWriter>();
+builder.Services.AddScoped<IOutboxWriter, OutboxWriter>();
+// END T6
 
 var app = builder.Build();
 
