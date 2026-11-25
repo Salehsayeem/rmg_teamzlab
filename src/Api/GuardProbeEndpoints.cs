@@ -20,6 +20,13 @@ public static class GuardProbeEndpoints
         app.MapPost("/guardz/probe/facility", FacilityCreate).AddEndpointFilter<IdempotencyFilter>();
         app.MapPost("/guardz/probe/facility/{id}/rename", FacilityRename);
         app.MapPost("/guardz/probe/facility/{id}/touch", FacilityTouch).AddEndpointFilter<IdempotencyFilter>();
+        app.MapPost("/guardz/probe/poco", PocoProbe).AddEndpointFilter<IdempotencyFilter>();
+
+        // Bare POCO return (not Results.*): serialized by the pipeline after the filter, so the
+        // idempotency filter must NOT capture or store it — each call really executes.
+        [Idempotent]
+        [RequirePerm("org.read")]
+        static object PocoProbe() => new { message = "poco-body" };
 
         [RequirePerm("org.read")]
         static async Task<IResult> FacilityById(Guid id, TenantScopedDbContext db)

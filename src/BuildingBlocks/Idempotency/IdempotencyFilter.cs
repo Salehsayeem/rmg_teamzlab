@@ -94,12 +94,15 @@ public sealed class IdempotencyFilter : IEndpointFilter
         }
 
         // Capture the endpoint's response bytes so a 2xx can be stored, then re-emit them untouched.
-        // Minimal-API results execute AFTER the filter chain returns, so the filter must execute the
-        // IResult itself to see the body; non-IResult returns pass through uncaptured (never stored).
+        // [Idempotent] requires an IResult return: minimal-API results execute AFTER the filter chain,
+        // so the filter must execute the IResult itself to see the body. A bare POCO return is
+        // serialized by the pipeline after the filter — it passes through uncaptured and is never
+        // idempotency-stored (its claim is released, so retries simply re-execute).
         var original = http.Response.Body;
         await using var buffer = new MemoryStream();
         http.Response.Body = buffer;
         object? result;
+        var captured = false;
         try
         {
             result = await next(context);
@@ -109,6 +112,7 @@ public sealed class IdempotencyFilter : IEndpointFilter
                 // The pipeline always executes the outermost filter's return value — hand it a no-op
                 // result (null would get JSON-serialized against the already-started response).
                 result = Results.Empty;
+                captured = true;
             }
         }
         catch
@@ -121,7 +125,7 @@ public sealed class IdempotencyFilter : IEndpointFilter
             http.Response.Body = original;
         }
 
-        if (http.Response.StatusCode is >= 200 and < 300)
+        if (captured && http.Response.StatusCode is >= 200 and < 300)
         {
             var claim = await records.SingleAsync(r =>
                 r.TenantId == tenantId && r.Endpoint == endpoint && r.KeyHash == keyHash);

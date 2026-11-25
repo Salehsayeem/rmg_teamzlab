@@ -122,6 +122,29 @@ public class IdempotencyTests : IntegrationTestBase
         Assert.Equal(2, await RevisionOfAsync(fx.FacilityA1)); // replayed, not re-executed
     }
 
+    [Fact]
+    public async Task Idempotent_NonIResult_Passthrough_Uncaptured()
+    {
+        var fx = await GuardTestSeed.SeedAsync(Db);
+        Client.DefaultRequestHeaders.Authorization = new("Bearer", await GuardTestSeed.LoginAsync(Client, fx.AdminAEmail));
+        Client.DefaultRequestHeaders.Add("Idempotency-Key", "idem-poco-1");
+
+        // A bare POCO return passes through uncaptured: both calls really execute and return the full
+        // body — no bodyless false replay, and no claim is stored.
+        var first = await Client.PostAsJsonAsync("/guardz/probe/poco", new { });
+        Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+        var firstBody = await first.Content.ReadAsStringAsync();
+        Assert.False(string.IsNullOrWhiteSpace(firstBody));
+        Assert.False(first.Headers.Contains("Idempotent-Replay"));
+
+        var second = await Client.PostAsJsonAsync("/guardz/probe/poco", new { });
+        Assert.Equal(HttpStatusCode.OK, second.StatusCode);
+        Assert.False(second.Headers.Contains("Idempotent-Replay"));
+
+        Assert.Equal(firstBody, await second.Content.ReadAsStringAsync());
+        Assert.False(await Db.Set<IdempotencyRecord>().AnyAsync()); // no bogus stored claim
+    }
+
     private async Task<int> RevisionOfAsync(Guid facilityId) =>
         await Db.Set<Facility>().IgnoreQueryFilters().Where(f => f.Id == facilityId).Select(f => f.Revision).SingleAsync();
 
