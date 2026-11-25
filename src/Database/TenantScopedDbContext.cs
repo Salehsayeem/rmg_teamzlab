@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Rmg.BuildingBlocks.Tenancy;
+using Rmg.Modules.Identity.Domain;
 using Rmg.Modules.Organization.Domain;
 
 namespace Rmg.Database;
@@ -22,5 +23,11 @@ public class TenantScopedDbContext(DbContextOptions<RmgDbContext> options) : Rmg
 
         // Replaces TenantEntityConfiguration's fail-closed null filter (the last HasQueryFilter call wins).
         modelBuilder.Entity<Facility>().HasQueryFilter(f => f.TenantId == AmbientTenantId);
+
+        // Task 9 (T4 carry-over): AppUser is tenant-pinned on this context only. Its configuration
+        // deliberately carries NO fail-closed filter because login (AuthUserStore), the seeder and the
+        // test harness query users on the base RmgDbContext — before any tenant is known — and must
+        // keep seeing them. Controller-side user reads run here, where the filter closes the leak.
+        modelBuilder.Entity<AppUser>().HasQueryFilter(u => u.TenantId == AmbientTenantId);
     }
 }
