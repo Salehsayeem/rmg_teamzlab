@@ -418,6 +418,12 @@ namespace Rmg.Database.Migrations
                         .HasColumnType("text")
                         .HasColumnName("updated_by");
 
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TenantId", "Code")

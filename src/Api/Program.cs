@@ -74,13 +74,19 @@ builder.Services.AddAuthorization();
 // ───────────────────────────────────────────────────────────────────────────────────────────
 
 // BEGIN T6 (additive block): audit + outbox writers resolve the request's DbContext/tenant context.
-// AddDbContext / ITenantContext deduped at merge (EF TryAdd is first-wins).
-// writers take the ambient DbContext (base type) — forward to the same scoped RmgDbContext instance
-builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<RmgDbContext>());
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuditWriter, AuditWriter>();
 builder.Services.AddScoped<IOutboxWriter, OutboxWriter>();
 // END T6
+
+// ── Task 7 (guard): tenant-scoped context carries the TenantEntity query filter for the guard
+// probes; the [Idempotent] filter stores/replays via the context's base type (the Idempotency project
+// cannot see the Database project), forwarded to the same scoped instance. ──
+builder.Services.AddDbContext<TenantScopedDbContext>(o =>
+    o.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+// writers, probes and the [Idempotent] filter resolve the ambient context by its base type —
+// forwarded to the same scoped, tenant-filtered instance (one SaveChanges = atomic business+outbox).
+builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<TenantScopedDbContext>());
 
 var app = builder.Build();
 
@@ -95,6 +101,27 @@ app.MapGet("/", () => "Hello World!");
 app.MapDevProbeEndpoints();
 app.MapAuthEndpoints();
 app.MapAuthProbeEndpoints();
+
+// ── Task 7 (guard): TenantEntity's query filter reads the ambient tenant — mirror it from
+// ITenantContext once TenantResolutionMiddleware has populated it — plus the guard probe endpoints.
+// Keyed POST bodies are buffered here because the minimal-API pipeline drains the request body
+// before [Idempotent] filters run; the filter hashes the captured bytes. ──
+app.Use(async (context, next) =>
+{
+    TenantEntity.SetAmbientTenant(context.RequestServices.GetRequiredService<ITenantContext>().TenantId);
+
+    if (HttpMethods.IsPost(context.Request.Method)
+        && context.Request.Headers.ContainsKey("Idempotency-Key"))
+    {
+        context.Request.EnableBuffering();
+        using var reader = new StreamReader(context.Request.Body, Encoding.UTF8, leaveOpen: true);
+        context.Items[Rmg.BuildingBlocks.Idempotency.IdempotencyFilter.RequestBodyItemKey] = await reader.ReadToEndAsync();
+        context.Request.Body.Position = 0;
+    }
+
+    await next(context);
+});
+app.MapGuardProbeEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
