@@ -10,7 +10,6 @@ using Rmg.BuildingBlocks.Auth;
 using Rmg.BuildingBlocks.Common;
 using Rmg.BuildingBlocks.Tenancy;
 using Rmg.Database;
-using Rmg.Modules.Identity.Contracts;
 
 // Local config comes from the gitignored .env (connection string, JWT key, seed password, ports).
 // Walked up from cwd because dotnet run / IIS Express don't guarantee cwd = repo root.

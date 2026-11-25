@@ -3,12 +3,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Common\Common.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\Tenancy\Tenancy.csproj" />
-    <ProjectReference Include="..\..\..\BuildingBlocks\Auth\Auth.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- WebApplication endpoint mapping lives in the shared framework. -->
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <PropertyGroup>
