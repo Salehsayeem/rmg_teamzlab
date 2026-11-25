@@ -115,7 +115,7 @@ public static class Seeder
         };
         admin.PasswordHash = hasher.HashPassword(admin, adminPassword);
         db.Add(admin);
-        db.Add(new UserRole { UserId = admin.Id, RoleId = adminRole.Id });
+        db.Add(new UserRole { TenantId = tenant.Id, UserId = admin.Id, RoleId = adminRole.Id });
 
         await db.SaveChangesAsync();
     }

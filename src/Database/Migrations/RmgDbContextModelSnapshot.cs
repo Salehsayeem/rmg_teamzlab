@@ -342,6 +342,10 @@ namespace Rmg.Database.Migrations
 
             modelBuilder.Entity("Rmg.Modules.Identity.Domain.UserRole", b =>
                 {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
@@ -350,9 +354,9 @@ namespace Rmg.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("role_id");
 
-                    b.HasKey("UserId", "RoleId");
+                    b.HasKey("TenantId", "UserId", "RoleId");
 
-                    b.HasIndex("RoleId");
+                    b.HasIndex("TenantId", "RoleId");
 
                     b.ToTable("user_role", "iam");
                 });
@@ -609,13 +613,15 @@ namespace Rmg.Database.Migrations
                 {
                     b.HasOne("Rmg.Modules.Identity.Domain.Role", null)
                         .WithMany()
-                        .HasForeignKey("RoleId")
+                        .HasForeignKey("TenantId", "RoleId")
+                        .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Rmg.Modules.Identity.Domain.AppUser", null)
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("TenantId", "UserId")
+                        .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

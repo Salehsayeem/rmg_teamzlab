@@ -53,6 +53,32 @@ public class HarnessTests : IntegrationTestBase
         await using (var cmd = new NpgsqlCommand("SELECT count(*) FROM iam.permission", conn))
             Assert.Equal(21L, (long)(await cmd.ExecuteScalarAsync())!);
 
+        // R-6 cross-tenant guard: user_role carries tenant_id NOT NULL and both its FKs are
+        // composite, leading with tenant_id (user and role must belong to the same tenant).
+        await using (var cmd = new NpgsqlCommand(
+            "SELECT is_nullable FROM information_schema.columns WHERE table_schema = 'iam' AND table_name = 'user_role' AND column_name = 'tenant_id'", conn))
+            Assert.Equal("NO", await cmd.ExecuteScalarAsync() as string);
+        await using (var cmd = new NpgsqlCommand(
+            """
+            SELECT count(DISTINCT tc.constraint_name) AS fk_count,
+                   count(*) FILTER (WHERE kcu.ordinal_position = 1 AND kcu.column_name = 'tenant_id') AS tenant_leading
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu
+              ON tc.constraint_name = kcu.constraint_name AND tc.constraint_schema = kcu.constraint_schema
+            WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_schema = 'iam' AND tc.table_name = 'user_role'
+            """, conn))
+        await using (var reader = await cmd.ExecuteReaderAsync())
+        {
+            Assert.True(await reader.ReadAsync());
+            Assert.Equal(2L, reader.GetInt64(0));
+            Assert.Equal(2L, reader.GetInt64(1));
+        }
+
+        // Admin role has the full catalogue.
+        await using (var cmd = new NpgsqlCommand(
+            "SELECT count(*) FROM iam.role_permission rp JOIN iam.role r ON r.id = rp.role_id WHERE r.code = 'Admin'", conn))
+            Assert.Equal(21L, (long)(await cmd.ExecuteScalarAsync())!);
+
         // Seeded admin verifies against the default seed password.
         var admin = await Db.Set<AppUser>().SingleAsync(u => u.Email == "admin@tzl.demo");
         var hasher = new PasswordHasher<AppUser>();

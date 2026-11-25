@@ -43,6 +43,7 @@ namespace Rmg.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_app_user", x => x.id);
+                    table.UniqueConstraint("AK_app_user_tenant_id_id", x => new { x.tenant_id, x.id });
                 });
 
             migrationBuilder.CreateTable(
@@ -142,6 +143,7 @@ namespace Rmg.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_role", x => x.id);
+                    table.UniqueConstraint("AK_role_tenant_id_id", x => new { x.tenant_id, x.id });
                 });
 
             migrationBuilder.CreateTable(
@@ -197,25 +199,26 @@ namespace Rmg.Database.Migrations
                 schema: "iam",
                 columns: table => new
                 {
+                    tenant_id = table.Column<Guid>(type: "uuid", nullable: false),
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     role_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_user_role", x => new { x.user_id, x.role_id });
+                    table.PrimaryKey("PK_user_role", x => new { x.tenant_id, x.user_id, x.role_id });
                     table.ForeignKey(
-                        name: "FK_user_role_app_user_user_id",
-                        column: x => x.user_id,
+                        name: "FK_user_role_app_user_tenant_id_user_id",
+                        columns: x => new { x.tenant_id, x.user_id },
                         principalSchema: "iam",
                         principalTable: "app_user",
-                        principalColumn: "id",
+                        principalColumns: new[] { "tenant_id", "id" },
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_user_role_role_role_id",
-                        column: x => x.role_id,
+                        name: "FK_user_role_role_tenant_id_role_id",
+                        columns: x => new { x.tenant_id, x.role_id },
                         principalSchema: "iam",
                         principalTable: "role",
-                        principalColumn: "id",
+                        principalColumns: new[] { "tenant_id", "id" },
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -373,10 +376,10 @@ namespace Rmg.Database.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_user_role_role_id",
+                name: "IX_user_role_tenant_id_role_id",
                 schema: "iam",
                 table: "user_role",
-                column: "role_id");
+                columns: new[] { "tenant_id", "role_id" });
         }
 
         /// <inheritdoc />

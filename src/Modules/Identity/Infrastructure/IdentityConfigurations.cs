@@ -72,10 +72,18 @@ public sealed class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
     public void Configure(EntityTypeBuilder<UserRole> b)
     {
         b.ToTable("user_role", "iam");
-        b.HasKey(x => new { x.UserId, x.RoleId });
+
+        // R-6: tenant_id inside the PK and both composite FKs — a user and their role must
+        // belong to the same tenant, enforced at the constraint level (no RLS in the pilot).
+        b.HasKey(x => new { x.TenantId, x.UserId, x.RoleId });
+        b.Property(x => x.TenantId).HasColumnName("tenant_id");
         b.Property(x => x.UserId).HasColumnName("user_id");
         b.Property(x => x.RoleId).HasColumnName("role_id");
-        b.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId);
-        b.HasOne<Role>().WithMany().HasForeignKey(x => x.RoleId);
+        b.HasOne<AppUser>().WithMany()
+            .HasForeignKey(x => new { x.TenantId, x.UserId })
+            .HasPrincipalKey(x => new { x.TenantId, x.Id });
+        b.HasOne<Role>().WithMany()
+            .HasForeignKey(x => new { x.TenantId, x.RoleId })
+            .HasPrincipalKey(x => new { x.TenantId, x.Id });
     }
 }
