@@ -3,6 +3,7 @@ using Rmg.BuildingBlocks.Audit;
 using Rmg.BuildingBlocks.Idempotency;
 using Rmg.BuildingBlocks.Outbox;
 using Rmg.Modules.Identity.Infrastructure;
+using Rmg.Modules.Merchandising.Infrastructure;
 using Rmg.Modules.Organization.Infrastructure;
 
 namespace Rmg.Database;
@@ -16,6 +17,8 @@ public class RmgDbContext(DbContextOptions<RmgDbContext> options) : DbContext(op
         // Assemblies without configurations yet (Merchandising/ProductEngineering) are wired by their own tasks.
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TenantConfiguration).Assembly);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppUserConfiguration).Assembly);
+        // T10 (ORD/M002): the Merchandising assembly was not scanned before its own task wired it.
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(BuyerConfiguration).Assembly);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OutboxMessageConfiguration).Assembly);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuditEventConfiguration).Assembly);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(IdempotencyRecordConfiguration).Assembly);

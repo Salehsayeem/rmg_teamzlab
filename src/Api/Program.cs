@@ -13,6 +13,7 @@ using Rmg.BuildingBlocks.Outbox;
 using Rmg.BuildingBlocks.Tenancy;
 using Rmg.Database;
 using Rmg.Modules.Identity.Infrastructure;
+using Rmg.Modules.Merchandising.Infrastructure;
 using Rmg.Modules.Organization.Infrastructure;
 
 // Local config comes from the gitignored .env (connection string, JWT key, seed password, ports).
@@ -94,6 +95,10 @@ builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<TenantScopedDb
 // (replaces FacilityConfig.CreateApi and IamController's per-request property getters). ──
 builder.Services.AddOrganizationApi();
 builder.Services.AddIamApi();
+
+// BEGIN Task 10 (ORD): buyer module DI composition (MerchandisingConfig).
+builder.Services.AddMerchandisingApi();
+// END Task 10 (ORD)
 
 // ── Controller seam (controller-authored, P-12): module endpoints are MVC controllers in
 // src/Api/Controllers (plan convention) — discovered from the entry assembly. ──
