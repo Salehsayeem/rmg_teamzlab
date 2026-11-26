@@ -16,6 +16,11 @@ export class ApiError extends Error {
     super(code);
     this.name = "ApiError";
   }
+
+  /** Alias kept for the styles screens' consumer naming (same object). */
+  get fields(): Record<string, string[]> {
+    return this.fieldErrors;
+  }
 }
 
 export type ApiResult<T> = { data: T; meta: Record<string, unknown> };
@@ -48,13 +53,16 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<Api
     const errors = Array.isArray(raw)
       ? raw.map((e) => (typeof e === "string" ? e : JSON.stringify(e)))
       : [];
-    // VALIDATION_FAILED sends errors as a field -> messages object; keep both shapes.
-    const fieldErrors =
-      raw && typeof raw === "object" && !Array.isArray(raw)
-        ? Object.fromEntries(
-            Object.entries(raw).filter((entry): entry is [string, string[]] => Array.isArray(entry[1])),
-          )
-        : {};
+    // Dictionary-shaped errors (VALIDATION_FAILED / ValidationProblem: { field: [msg] }) surface
+    // as per-field messages; non-array values coerce to single-message arrays.
+    const fieldErrors: Record<string, string[]> = {};
+    if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+      for (const [field, messages] of Object.entries(raw as Record<string, unknown>)) {
+        fieldErrors[field] = Array.isArray(messages)
+          ? messages.map((m) => (typeof m === "string" ? m : JSON.stringify(m)))
+          : [typeof messages === "string" ? messages : JSON.stringify(messages)];
+      }
+    }
     throw new ApiError(res.status, problem?.code ?? problem?.title ?? "UNKNOWN", errors, fieldErrors);
   }
 
