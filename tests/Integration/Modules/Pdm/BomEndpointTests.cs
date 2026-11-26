@@ -172,7 +172,7 @@ public class BomEndpointTests : IntegrationTestBase
         var problem = await ProblemAsync(response);
         Assert.Equal("QTY_POSITIVE", problem.GetProperty("code").GetString());
         Assert.Equal(422, problem.GetProperty("status").GetInt32());
-        Assert.Equal(0, await Db.Set<BomLine>().IgnoreQueryFilters().CountAsync());
+        Assert.Equal(0, await Db.Set<BomLine>().IgnoreQueryFilters().CountAsync(l => l.BomId == bomId)); // scoped: the demo dataset seeds its own BOM lines
     }
 
     [Fact]
@@ -192,7 +192,7 @@ public class BomEndpointTests : IntegrationTestBase
         Assert.Equal(HttpStatusCode.UnprocessableEntity, badMaterial.StatusCode);
         Assert.Equal("MATERIAL_INVALID", (await ProblemAsync(badMaterial)).GetProperty("code").GetString());
 
-        Assert.Equal(0, await Db.Set<BomLine>().IgnoreQueryFilters().CountAsync());
+        Assert.Equal(0, await Db.Set<BomLine>().IgnoreQueryFilters().CountAsync(l => l.BomId == bomId)); // scoped: the demo dataset seeds its own BOM lines
     }
 
     [Fact]
@@ -213,7 +213,7 @@ public class BomEndpointTests : IntegrationTestBase
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, late.StatusCode);
         Assert.Equal("INVALID_STATE", (await ProblemAsync(late)).GetProperty("code").GetString());
-        Assert.Equal(1, await Db.Set<BomLine>().IgnoreQueryFilters().CountAsync());
+        Assert.Equal(1, await Db.Set<BomLine>().IgnoreQueryFilters().CountAsync(l => l.BomId == bomId)); // scoped: the demo dataset seeds its own BOM lines
     }
 
     [Fact]
@@ -247,7 +247,7 @@ public class BomEndpointTests : IntegrationTestBase
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, second.StatusCode);
         Assert.Equal("BOM_EXISTS", (await ProblemAsync(second)).GetProperty("code").GetString());
-        Assert.Equal(1, await Db.Set<Bom>().IgnoreQueryFilters().CountAsync());
+        Assert.Equal(1, await Db.Set<Bom>().IgnoreQueryFilters().CountAsync(b => b.StyleVersionId == versionId)); // scoped: the demo dataset seeds its own BOM
     }
 
     [Fact]

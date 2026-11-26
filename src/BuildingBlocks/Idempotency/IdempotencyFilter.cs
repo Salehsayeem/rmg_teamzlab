@@ -95,9 +95,12 @@ public sealed class IdempotencyFilter : IEndpointFilter
 
         // Capture the endpoint's response bytes so a 2xx can be stored, then re-emit them untouched.
         // [Idempotent] requires an IResult return: minimal-API results execute AFTER the filter chain,
-        // so the filter must execute the IResult itself to see the body. A bare POCO return is
-        // serialized by the pipeline after the filter — it passes through uncaptured and is never
-        // idempotency-stored (its claim is released, so retries simply re-execute).
+        // so the filter must execute the IResult itself to see the body. MVC controller actions wrap
+        // an IResult return in an internal HttpActionResult before the filter sees it — unwrapped
+        // below so the same capture contract holds for [Idempotent] controller actions (T14 order
+        // confirm). A bare POCO return is serialized by the pipeline after the filter — it passes
+        // through uncaptured and is never idempotency-stored (its claim is released, so retries
+        // simply re-execute).
         var original = http.Response.Body;
         await using var buffer = new MemoryStream();
         http.Response.Body = buffer;
@@ -106,7 +109,15 @@ public sealed class IdempotencyFilter : IEndpointFilter
         try
         {
             result = await next(context);
-            if (result is IResult executable)
+            var executable = result as IResult;
+            if (executable is null && result is Microsoft.AspNetCore.Mvc.IActionResult actionResult)
+            {
+                // MVC wraps an IResult-returning controller action in its (internal) HttpActionResult
+                // before the filter sees it — unwrap the public IResult Result property so the capture
+                // contract holds for [Idempotent] controller actions (T14 order confirm).
+                executable = actionResult.GetType().GetProperty("Result")?.GetValue(actionResult) as IResult;
+            }
+            if (executable is not null)
             {
                 await executable.ExecuteAsync(http);
                 // The pipeline always executes the outermost filter's return value — hand it a no-op

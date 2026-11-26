@@ -123,7 +123,12 @@ app.MapGet("/", () => "Hello World!");
 app.MapDevProbeEndpoints();
 app.MapAuthEndpoints();
 app.MapAuthProbeEndpoints();
-app.MapControllers();
+// BEGIN Task 14 (ORD): [Idempotent] confirm — an endpoint filter reaches MVC actions only through
+// the MapControllers convention builder (docs: "Register a filter on controller actions"); the
+// filter self-gates on the [Idempotent] metadata, so nothing else changes behavior.
+app.MapControllers().AddEndpointFilter<Microsoft.AspNetCore.Builder.ControllerActionEndpointConventionBuilder,
+    Rmg.BuildingBlocks.Idempotency.IdempotencyFilter>();
+// END Task 14 (ORD)
 
 // ── Task 7 (guard): TenantEntity's query filter reads the ambient tenant — mirror it from
 // ITenantContext once TenantResolutionMiddleware has populated it — plus the guard probe endpoints.
@@ -157,6 +162,12 @@ if (app.Environment.IsDevelopment())
             .UseNpgsql(connectionString)
             .Options);
         await Seeder.SeedAsync(db, builder.Configuration["Seed:AdminPassword"] ?? Seeder.DefaultAdminPassword);
+        // BEGIN Task 14 (ORD): spec §8 demo dataset — browser-ready buyer/style/BOM/order after boot.
+        // Skipped on a database that has not migrated to 005 yet (e.g. a dev DB awaiting `db reset`);
+        // the reset path always migrates first, so the demo dataset installs there.
+        if ((await db.Database.GetAppliedMigrationsAsync()).Any(m => m.EndsWith("005_OrdOrder")))
+            await Seeder.DemoSeedAsync(db);
+        // END Task 14 (ORD)
     }
 }
 

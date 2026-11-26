@@ -9,5 +9,8 @@ public static class MerchandisingConfig
 {
     public static IServiceCollection AddMerchandisingApi(this IServiceCollection services) =>
         services.AddScoped<IBuyerRepository, BuyerRepository>()
-            .AddScoped<IMerchandisingApi, BuyerService>();
+            .AddScoped<IMerchandisingApi, BuyerService>()
+            // Task 14 (ORD): customer order capture + lifecycle — same additive registration pattern.
+            .AddScoped<IOrderRepository, OrderRepository>()
+            .AddScoped<IOrderApi, OrderService>();
 }

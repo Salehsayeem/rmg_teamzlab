@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Rmg.BuildingBlocks.Tenancy;
 using Rmg.Modules.Identity.Domain;
+using Rmg.Modules.Merchandising.Domain;
 using Rmg.Modules.Organization.Domain;
 using Rmg.Modules.ProductEngineering.Domain;
 
@@ -42,5 +43,13 @@ public class TenantScopedDbContext(DbContextOptions<RmgDbContext> options) : Rmg
         modelBuilder.Entity<Bom>().HasQueryFilter(b => b.TenantId == AmbientTenantId);
         modelBuilder.Entity<BomLine>().HasQueryFilter(l => l.TenantId == AmbientTenantId);
         // END Task 12+13 (PDM)
+
+        // BEGIN Task 14 (ORD): customer order + lines + sizes + schedules tenant-pinned on this
+        // context, same additive pattern as above.
+        modelBuilder.Entity<CustomerOrder>().HasQueryFilter(o => o.TenantId == AmbientTenantId);
+        modelBuilder.Entity<OrderLine>().HasQueryFilter(l => l.TenantId == AmbientTenantId);
+        modelBuilder.Entity<SizeQuantity>().HasQueryFilter(s => s.TenantId == AmbientTenantId);
+        modelBuilder.Entity<DeliverySchedule>().HasQueryFilter(d => d.TenantId == AmbientTenantId);
+        // END Task 14 (ORD)
     }
 }

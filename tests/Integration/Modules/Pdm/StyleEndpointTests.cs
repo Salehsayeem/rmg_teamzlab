@@ -142,7 +142,7 @@ public class StyleEndpointTests : IntegrationTestBase
         Assert.Equal(422, problem.RootElement.GetProperty("status").GetInt32());
         Assert.True(problem.RootElement.TryGetProperty("errors", out var errors)
             && errors.TryGetProperty("variants", out _), raw);
-        Assert.Equal(0, await Db.Set<Style>().IgnoreQueryFilters().CountAsync());
+        Assert.Equal(0, await Db.Set<Style>().IgnoreQueryFilters().CountAsync(s => s.Code == "STY-DUPV")); // scoped: the demo dataset seeds STY-001
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public class StyleEndpointTests : IntegrationTestBase
         var problem = JsonDocument.Parse(await dupe.Content.ReadAsStringAsync());
         Assert.Equal("STYLE_CODE_TAKEN", problem.RootElement.GetProperty("code").GetString());
         Assert.Equal(422, problem.RootElement.GetProperty("status").GetInt32());
-        Assert.Equal(1, await Db.Set<Style>().IgnoreQueryFilters().CountAsync());
+        Assert.Equal(1, await Db.Set<Style>().IgnoreQueryFilters().CountAsync(s => s.Code == "STY-DUP")); // scoped: the demo dataset seeds STY-001
     }
 
     [Fact]

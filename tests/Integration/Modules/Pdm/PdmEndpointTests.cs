@@ -78,7 +78,8 @@ public class PdmEndpointTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new("Bearer", token);
         var list = await Client.GetAsync("/api/v1/pdm/materials");
         var page = await list.Content.ReadFromJsonAsync<Envelope<MaterialDto[]>>();
-        Assert.Empty(page!.Data);
+        // Scoped: the boot-seeded demo dataset carries its own materials; assert only the rejected one is absent.
+        Assert.DoesNotContain(page!.Data, m => m.Code == "RM-BAD");
     }
 
     [Fact]

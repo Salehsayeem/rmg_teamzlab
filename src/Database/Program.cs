@@ -33,6 +33,7 @@ internal static class Program
             .UseNpgsql(connectionString)
             .Options);
         await Seeder.SeedAsync(db, adminPassword);
+        await Seeder.DemoSeedAsync(db); // Task 14: spec §8 demo dataset (buyer/style/BOM/order)
 
         Console.WriteLine("Database reset complete.");
         return 0;
