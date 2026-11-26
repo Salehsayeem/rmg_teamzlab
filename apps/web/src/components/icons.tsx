@@ -131,6 +131,31 @@ export function InboxIcon() {
   );
 }
 
+export function PlusIcon() {
+  return (
+    <Svg className="size-4">
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </Svg>
+  );
+}
+
+export function ChevronLeftIcon() {
+  return (
+    <Svg className="size-4">
+      <path d="m15 18-6-6 6-6" />
+    </Svg>
+  );
+}
+
+export function ChevronRightIcon() {
+  return (
+    <Svg className="size-4">
+      <path d="m9 18 6-6-6-6" />
+    </Svg>
+  );
+}
+
 export function AlertIcon() {
   return (
     <Svg>
