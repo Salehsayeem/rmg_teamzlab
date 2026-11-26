@@ -10,6 +10,8 @@ export class ApiError extends Error {
     readonly status: number,
     readonly code: string,
     readonly errors: string[] = [],
+    /** Per-field messages from ValidationProblem-style errors ({ field: [msg] }). */
+    readonly fields: Record<string, string[]> = {},
   ) {
     super(code);
     this.name = "ApiError";
@@ -45,7 +47,17 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<Api
     const errors = Array.isArray(problem?.errors)
       ? problem.errors.map((e) => (typeof e === "string" ? e : JSON.stringify(e)))
       : [];
-    throw new ApiError(res.status, problem?.code ?? problem?.title ?? "UNKNOWN", errors);
+    // Dictionary-shaped errors (ValidationProblem: { field: [msg] }) surface as per-field
+    // messages instead of the flat list; RmgProblemException puts stable-code details there too.
+    const fields: Record<string, string[]> = {};
+    if (problem?.errors && !Array.isArray(problem.errors)) {
+      for (const [field, messages] of Object.entries(problem.errors as Record<string, unknown>)) {
+        fields[field] = Array.isArray(messages)
+          ? messages.map((m) => (typeof m === "string" ? m : JSON.stringify(m)))
+          : [typeof messages === "string" ? messages : JSON.stringify(messages)];
+      }
+    }
+    throw new ApiError(res.status, problem?.code ?? problem?.title ?? "UNKNOWN", errors, fields);
   }
 
   const envelope = (await res.json()) as { data?: T; meta?: Record<string, unknown> };
