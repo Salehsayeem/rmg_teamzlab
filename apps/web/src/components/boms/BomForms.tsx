@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import Link from "next/link";
 import { AlertIcon, PlusIcon } from "@/components/icons";
 import { addLine, createBom, release, type BomActionState } from "@/lib/actions/boms";
@@ -188,6 +188,8 @@ export function AddLineForm({
 
 /**
  * Release action with a styled inline confirm panel (release is irreversible).
+ * The panel is an alertdialog: focus moves to Cancel on open and returns to the
+ * Release trigger on Cancel, so keyboard/SR users get both transitions.
  * NO_LINES / BOM_REVISION_CONFLICT surface in the panel; the conflict banner
  * gains a reload-to-latest link. Button disables without pdm.bom.approve.
  */
@@ -207,6 +209,7 @@ export function ReleasePanel({
   const t = dict.boms;
   const [state, formAction, pending] = useActionState(release.bind(null, lang, styleId, bomId), INITIAL);
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const reloadHref = `/${lang}/styles/${styleId}/bom`;
 
   return (
@@ -215,6 +218,7 @@ export function ReleasePanel({
         <div className="flex items-center gap-3">
           <button
             type="button"
+            ref={triggerRef}
             onClick={() => setOpen(true)}
             disabled={!canApprove}
             className="flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
@@ -225,14 +229,14 @@ export function ReleasePanel({
         </div>
       )}
       {open && (
-        <div className="rounded-lg border border-border bg-card p-4">
+        <div role="alertdialog" aria-labelledby="bom-release-confirm-title" aria-describedby="bom-release-confirm-body" className="rounded-lg border border-border bg-card p-4">
           <div className="flex gap-3">
             <span aria-hidden="true" className="mt-0.5 text-warning">
               <AlertIcon />
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-medium">{t.release.confirmTitle}</p>
-              <p className="mt-0.5 text-sm text-sidebar-foreground">{t.release.confirmBody}</p>
+              <p id="bom-release-confirm-title" className="text-sm font-medium">{t.release.confirmTitle}</p>
+              <p id="bom-release-confirm-body" className="mt-0.5 text-sm text-sidebar-foreground">{t.release.confirmBody}</p>
             </div>
           </div>
           {state.status === "error" && state.message && (
@@ -241,7 +245,11 @@ export function ReleasePanel({
           <div className="mt-4 flex items-center justify-end gap-2">
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              autoFocus
+              onClick={() => {
+                setOpen(false);
+                triggerRef.current?.focus();
+              }}
               className="flex h-10 items-center rounded-lg border border-border px-4 text-sm font-medium text-sidebar-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               {t.release.cancel}
