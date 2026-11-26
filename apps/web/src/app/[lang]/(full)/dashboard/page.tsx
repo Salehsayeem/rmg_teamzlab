@@ -76,7 +76,7 @@ function StatTile({
   icon,
 }: {
   stat: { label: string; hint: string };
-  value: number;
+  value: string;
   tint: string;
   icon: ReactNode;
 }) {
@@ -102,9 +102,12 @@ async function DashboardData({ lang, dict }: { lang: Lang; dict: Dict }) {
   let buyers: BuyerDto[] = [];
   let styles: StyleDto[] = [];
   let orders: OrderDto[] = [];
+  let buyersMore = false;
+  let ordersMore = false;
   let failed = false;
   try {
-    // pageSize=100 is the API cap; counts are exact for pilot-sized tenants.
+    // pageSize=100 is the API cap; a trailing "+" marks a count clipped by it.
+    // PageMeta nests under meta.meta (buyers wire shape, see buyers/page.tsx).
     const [b, s, o] = await Promise.all([
       apiFetch<BuyerDto[]>("/ord/buyers?pageSize=100"),
       apiFetch<StyleDto[]>("/pdm/styles"),
@@ -113,6 +116,8 @@ async function DashboardData({ lang, dict }: { lang: Lang; dict: Dict }) {
     buyers = b.data;
     styles = s.data;
     orders = o.data;
+    buyersMore = typeof ((b.meta.meta ?? b.meta) as { nextCursor?: unknown }).nextCursor === "string";
+    ordersMore = typeof ((o.meta.meta ?? o.meta) as { nextCursor?: unknown }).nextCursor === "string";
   } catch {
     // Only real fetch failures land here: the prerender abort fired before the try.
     failed = true;
@@ -152,9 +157,9 @@ async function DashboardData({ lang, dict }: { lang: Lang; dict: Dict }) {
     new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: "code" });
 
   const tiles = [
-    { stat: d.stats.buyers, value: buyers.length, tint: "bg-lightprimary text-primary", icon: <UsersIcon /> },
-    { stat: d.stats.styles, value: styles.length, tint: "bg-lightinfo text-info", icon: <ShirtIcon /> },
-    { stat: d.stats.orders, value: orders.length, tint: "bg-lightwarning text-warning", icon: <OrdersIcon /> },
+    { stat: d.stats.buyers, value: `${buyers.length}${buyersMore ? "+" : ""}`, tint: "bg-lightprimary text-primary", icon: <UsersIcon /> },
+    { stat: d.stats.styles, value: String(styles.length), tint: "bg-lightinfo text-info", icon: <ShirtIcon /> },
+    { stat: d.stats.orders, value: `${orders.length}${ordersMore ? "+" : ""}`, tint: "bg-lightwarning text-warning", icon: <OrdersIcon /> },
   ];
 
   return (
