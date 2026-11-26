@@ -79,6 +79,14 @@ public sealed class OrderService(IOrderRepository orders, IAuditWriter audit, IO
                     errors[$"lines[{i}].price"] = ["Price must be zero or greater."];
                 if ((line.Sizes ?? []).Length == 0)
                     errors[$"lines[{i}].sizes"] = ["A line needs at least one size quantity."];
+                // A missing color/size on a cell is a shape problem, not a variant mismatch: the
+                // domain loop below dereferences these, so nulls must never reach it.
+                for (var j = 0; j < (line.Sizes ?? []).Length; j++)
+                    if (string.IsNullOrWhiteSpace(line.Sizes![j].ColorCode) || string.IsNullOrWhiteSpace(line.Sizes![j].SizeCode))
+                        errors[$"lines[{i}].sizes[{j}]"] = ["Every size quantity needs a color code and a size code."];
+                for (var j = 0; j < (line.Schedules ?? []).Length; j++)
+                    if (line.Schedules![j].ShipDate == default)
+                        errors[$"lines[{i}].schedules[{j}].shipDate"] = ["Ship date is required."];
             }
         }
         if (errors.Count > 0) throw new ValidationProblem(errors);

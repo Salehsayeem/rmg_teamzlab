@@ -278,6 +278,85 @@ public class OrderEndpointTests : IntegrationTestBase
         Assert.Equal(0, await Db.Set<CustomerOrder>().IgnoreQueryFilters().CountAsync(o => o.Code == "ORD-VAR"));
     }
 
+    private async Task<HttpResponseMessage> CaptureRawLineAsync(string token, Guid buyerId, Guid versionId, string code, object line) =>
+        await CaptureAsync(token, new
+        {
+            code,
+            buyerId,
+            buyerPo = $"PO-{code}",
+            currency = "USD",
+            orderDate = "2026-01-15",
+            lines = new[] { line },
+        });
+
+    // A JSON-null colorCode/sizeCode must be a controlled 400 shape problem, never a 500 NRE from
+    // the variant-mismatch loop (the cells' presence is checked before any domain rule runs).
+    [Fact]
+    public async Task Capture_SizeCell_MissingColor_400()
+    {
+        var token = await AdminTokenAsync();
+        var tenantId = await Db.Set<Tenant>().Select(t => t.Id).SingleAsync();
+        var buyerId = await SeedBuyerAsync(tenantId, "BUY-JNK1");
+        var (_, versionId) = await CreateApprovedVersionAsync(token, buyerId, "STY-JNK1", [("NAVY", "L")]);
+
+        var response = await CaptureRawLineAsync(token, buyerId, versionId, "ORD-JNK1",
+            new { styleVersionId = versionId, price = 4.25m, sizes = new[] { new { colorCode = (string?)null, sizeCode = "L", qty = 5m } } });
+
+        Assert.True(response.StatusCode == HttpStatusCode.BadRequest,
+            $"junk cell: {(int)response.StatusCode} {await response.Content.ReadAsStringAsync()}");
+        var problem = await ProblemAsync(response);
+        Assert.Equal("VALIDATION_FAILED", problem.GetProperty("code").GetString());
+        Assert.True(problem.GetProperty("errors").TryGetProperty("lines[0].sizes[0]", out var cellErrors));
+        Assert.NotEmpty(cellErrors.EnumerateArray());
+        Assert.Equal(0, await Db.Set<CustomerOrder>().IgnoreQueryFilters().CountAsync(o => o.Code == "ORD-JNK1"));
+    }
+
+    [Fact]
+    public async Task Capture_SizeCell_MissingSize_400()
+    {
+        var token = await AdminTokenAsync();
+        var tenantId = await Db.Set<Tenant>().Select(t => t.Id).SingleAsync();
+        var buyerId = await SeedBuyerAsync(tenantId, "BUY-JNK2");
+        var (_, versionId) = await CreateApprovedVersionAsync(token, buyerId, "STY-JNK2", [("NAVY", "L")]);
+
+        var response = await CaptureRawLineAsync(token, buyerId, versionId, "ORD-JNK2",
+            new { styleVersionId = versionId, price = 4.25m, sizes = new[] { new { colorCode = "NAVY", sizeCode = (string?)null, qty = 5m } } });
+
+        Assert.True(response.StatusCode == HttpStatusCode.BadRequest,
+            $"junk cell: {(int)response.StatusCode} {await response.Content.ReadAsStringAsync()}");
+        var problem = await ProblemAsync(response);
+        Assert.Equal("VALIDATION_FAILED", problem.GetProperty("code").GetString());
+        Assert.True(problem.GetProperty("errors").TryGetProperty("lines[0].sizes[0]", out var cellErrors));
+        Assert.NotEmpty(cellErrors.EnumerateArray());
+        Assert.Equal(0, await Db.Set<CustomerOrder>().IgnoreQueryFilters().CountAsync(o => o.Code == "ORD-JNK2"));
+    }
+
+    // A schedule without a ship date would otherwise stage as 0001-01-01 — rejected at shape level.
+    [Fact]
+    public async Task Capture_Schedule_MissingShipDate_400()
+    {
+        var token = await AdminTokenAsync();
+        var tenantId = await Db.Set<Tenant>().Select(t => t.Id).SingleAsync();
+        var buyerId = await SeedBuyerAsync(tenantId, "BUY-JNK3");
+        var (_, versionId) = await CreateApprovedVersionAsync(token, buyerId, "STY-JNK3", [("NAVY", "L")]);
+
+        var response = await CaptureRawLineAsync(token, buyerId, versionId, "ORD-JNK3", new
+        {
+            styleVersionId = versionId,
+            price = 4.25m,
+            sizes = new[] { new { colorCode = "NAVY", sizeCode = "L", qty = 600m } },
+            schedules = new[] { new { qty = 600m } }, // no shipDate → default(DateOnly)
+        });
+
+        Assert.True(response.StatusCode == HttpStatusCode.BadRequest,
+            $"missing ship date: {(int)response.StatusCode} {await response.Content.ReadAsStringAsync()}");
+        var problem = await ProblemAsync(response);
+        Assert.Equal("VALIDATION_FAILED", problem.GetProperty("code").GetString());
+        Assert.True(problem.GetProperty("errors").TryGetProperty("lines[0].schedules[0].shipDate", out var shipErrors));
+        Assert.NotEmpty(shipErrors.EnumerateArray());
+        Assert.Equal(0, await Db.Set<CustomerOrder>().IgnoreQueryFilters().CountAsync(o => o.Code == "ORD-JNK3"));
+    }
+
     [Fact]
     public async Task DuplicateBuyerPo_422()
     {
