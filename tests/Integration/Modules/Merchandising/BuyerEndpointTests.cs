@@ -95,14 +95,14 @@ public class BuyerEndpointTests : IntegrationTestBase
     {
         var token = await AdminTokenAsync();
 
-        var response = await PostBuyerAsync(token, "BUY-001", email: "nadia@acme.demo", phone: "+8801700000000");
+        var response = await PostBuyerAsync(token, "BUY-NEW", email: "nadia@acme.demo", phone: "+8801700000000");
 
         Assert.True(response.StatusCode == HttpStatusCode.Created,
             $"create failed: {(int)response.StatusCode} {await response.Content.ReadAsStringAsync()}");
         var body = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
         var data = body.RootElement.GetProperty("data");
         var buyerId = data.GetProperty("id").GetGuid();
-        Assert.Equal("BUY-001", data.GetProperty("code").GetString());
+        Assert.Equal("BUY-NEW", data.GetProperty("code").GetString());
         Assert.Equal("Acme Apparel Ltd.", data.GetProperty("name").GetString());
         Assert.Equal("BD", data.GetProperty("country").GetString());
         Assert.Equal("USD", data.GetProperty("currency").GetString());
@@ -145,7 +145,8 @@ public class BuyerEndpointTests : IntegrationTestBase
         var body1 = await JsonDocument.ParseAsync(await page1.Content.ReadAsStreamAsync());
         var codes1 = body1.RootElement.GetProperty("data").EnumerateArray()
             .Select(b => b.GetProperty("code").GetString()).ToArray();
-        Assert.Equal(["BUY-A", "BUY-B"], codes1);
+        // The boot-seeded demo buyer BUY-001 sorts first on the code keyset.
+        Assert.Equal(["BUY-001", "BUY-A"], codes1);
         var meta = body1.RootElement.GetProperty("meta").GetProperty("meta");
         Assert.Equal(2, meta.GetProperty("pageSize").GetInt32());
         var nextCursor = meta.GetProperty("nextCursor").GetString();
@@ -157,7 +158,7 @@ public class BuyerEndpointTests : IntegrationTestBase
         var body2 = await JsonDocument.ParseAsync(await page2.Content.ReadAsStreamAsync());
         var codes2 = body2.RootElement.GetProperty("data").EnumerateArray()
             .Select(b => b.GetProperty("code").GetString()).ToArray();
-        Assert.Equal(["BUY-C"], codes2);
+        Assert.Equal(["BUY-B", "BUY-C"], codes2);
         Assert.Null(body2.RootElement.GetProperty("meta").GetProperty("meta").GetProperty("nextCursor").GetString());
     }
 
@@ -202,7 +203,7 @@ public class BuyerEndpointTests : IntegrationTestBase
         var problem = await JsonDocument.ParseAsync(await dupe.Content.ReadAsStreamAsync());
         Assert.Equal("BUYER_CODE_TAKEN", problem.RootElement.GetProperty("code").GetString());
         Assert.Equal(422, problem.RootElement.GetProperty("status").GetInt32());
-        Assert.Equal(1, await Db.Set<Buyer>().CountAsync());
+        Assert.Equal(1, await Db.Set<Buyer>().CountAsync(b => b.Code == "BUY-DUP")); // scoped: the demo dataset owns BUY-001
     }
 
     [Fact]
