@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { AlertIcon } from "@/components/icons";
 import { cancelOrder, confirmOrder, type ConfirmState, type OrderFormState } from "@/lib/actions/orders";
@@ -31,10 +31,17 @@ export function OrderActions({ lang, dict, orderId, status, revision, canConfirm
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [cancelState, cancelFormAction, cancelPending] = useActionState(cancelOrder.bind(null, lang, orderId), INITIAL);
 
+  // One Idempotency-Key per logical confirm attempt: stable while the order and
+  // revision stay the same (a retry after a lost response replays), regenerated
+  // after a successful confirm or any revision change.
+  // The deps ARE the invalidation key (regenerate on change), not data the uuid reads.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const confirmKey = useMemo(() => crypto.randomUUID(), [orderId, revision]);
+
   const onConfirm = () =>
     startConfirm(async () => {
       setConfirmState({ status: "idle" });
-      const result = await confirmOrder(lang, orderId, revision);
+      const result = await confirmOrder(lang, orderId, revision, confirmKey);
       // redirect() on success unwinds with its own sentinel — only failures land here.
       setConfirmState(result);
       setConfirmOpen(false);

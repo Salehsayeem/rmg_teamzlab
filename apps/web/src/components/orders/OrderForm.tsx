@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertIcon, PlusIcon } from "@/components/icons";
 import { createOrder, type OrderFormState } from "@/lib/actions/orders";
@@ -124,7 +124,20 @@ export function OrderForm({
     })),
   });
 
+  // One Idempotency-Key per logical submission: stable while the payload is
+  // unchanged (a retry after a lost response replays), regenerated whenever any
+  // field edit changes the payload (that is a new logical attempt).
+  // The payload IS the invalidation key (regenerate when it changes), not data the uuid reads.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const idempotencyKey = useMemo(() => crypto.randomUUID(), [payload]);
+
   const fieldError = (field: string, clientMsg?: string) => state.fieldErrors?.[field]?.[0] ?? clientMsg;
+  // Server errors keyed under `lines[i]...` (VALIDATION_FAILED shape / ORDER_VARIANT_MISMATCH
+  // cells) render inside the matching line block — house pattern: nested-key collection.
+  const lineServerErrors = (i: number) =>
+    Object.entries(state.fieldErrors ?? {})
+      .filter(([key]) => key === `lines[${i}]` || key.startsWith(`lines[${i}].`))
+      .flatMap(([, messages]) => messages);
 
   return (
     <section className="rounded-lg border border-border bg-card p-6">
@@ -140,6 +153,7 @@ export function OrderForm({
       )}
       <form action={formAction} className="flex flex-col gap-4" noValidate>
         <input type="hidden" name="payload" value={payload} />
+        <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="order-code" className="text-sm font-medium">{t.form.code}</label>
@@ -317,13 +331,16 @@ export function OrderForm({
                 <div className="mt-4">
                   <p className="text-sm font-medium">{t.form.sizes}</p>
                   <p className="mt-0.5 text-xs text-sidebar-foreground">{t.form.sizesHint}</p>
-                  {lineProblems(i).length > 0 && (
-                    <ul role="alert" className="mt-2 list-inside list-disc text-xs text-error">
-                      {lineProblems(i).map((msg) => (
-                        <li key={msg}>{msg}</li>
-                      ))}
-                    </ul>
-                  )}
+                  {(() => {
+                    const lineErrors = [...lineProblems(i), ...lineServerErrors(i)];
+                    return lineErrors.length > 0 ? (
+                      <ul role="alert" className="mt-2 list-inside list-disc text-xs text-error">
+                        {lineErrors.map((msg) => (
+                          <li key={msg}>{msg}</li>
+                        ))}
+                      </ul>
+                    ) : null;
+                  })()}
                   {optionFor(line.styleVersionId) && (
                     <div className="mt-3 overflow-x-auto">
                       <table className="w-full min-w-[480px] border-collapse text-sm">

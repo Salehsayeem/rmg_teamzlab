@@ -31,12 +31,19 @@ export type OrderPayload = {
   }[];
 };
 
+/** A plausible uuid (the IdempotencyFilter keys on it; junk falls back to a fresh one). */
+const UUIDISH = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const idemKey = (value: unknown) =>
+  typeof value === "string" && UUIDISH.test(value) ? value : crypto.randomUUID();
+
 /**
  * Creates a customer order via POST /ord/customer-orders. ord.order.create is
- * re-checked here so direct POSTs to the action cannot create. Every submit
- * sends a fresh Idempotency-Key (crypto.randomUUID) so a retry after a lost
- * response cannot double-create. Success navigates to the detail page:
- * redirect() unwinds via a thrown sentinel, so it sits outside the try.
+ * re-checked here so direct POSTs to the action cannot create. The
+ * Idempotency-Key is generated client-side once per logical submission (the
+ * form's hidden field regenerates it only when the payload changes), so a
+ * retry after a lost response replays the stored response instead of
+ * double-creating. Success navigates to the detail page: redirect() unwinds
+ * via a thrown sentinel, so it sits outside the try.
  */
 export async function createOrder(
   lang: Lang,
@@ -60,7 +67,7 @@ export async function createOrder(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Idempotency-Key": crypto.randomUUID(),
+        "Idempotency-Key": idemKey(formData.get("idempotencyKey")),
       },
       body: JSON.stringify(payload),
     });
@@ -99,15 +106,18 @@ export type ConfirmState = {
 /**
  * Confirms an order via POST /ord/customer-orders/{id}/confirm with the loaded
  * detail's revision as expectedRevision. The endpoint is [Idempotent] and the
- * submit carries a fresh Idempotency-Key, so a retry after a lost response
- * replays the first result instead of double-writing. A 409
- * ORDER_REVISION_CONFLICT refetches the order so the banner can offer a
- * refresh to the current revision. Success redirects back to the detail page.
+ * client keeps one Idempotency-Key per (order, revision) — stable across
+ * retries of the same logical confirm attempt, so a retry after a lost
+ * response replays the first result instead of double-writing; a revision
+ * change regenerates it. A 409 ORDER_REVISION_CONFLICT refetches the order so
+ * the banner can offer a refresh to the current revision. Success redirects
+ * back to the detail page.
  */
 export async function confirmOrder(
   lang: Lang,
   id: string,
   expectedRevision: number,
+  idempotencyKey: string,
 ): Promise<ConfirmState> {
   if (!(await can("ord.order.confirm"))) {
     return { status: "error", message: getDict(lang).orders.errors.generic };
@@ -117,7 +127,7 @@ export async function confirmOrder(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Idempotency-Key": crypto.randomUUID(),
+        "Idempotency-Key": idemKey(idempotencyKey),
       },
       body: JSON.stringify({ expectedRevision }),
     });
