@@ -23,6 +23,21 @@ export const en = {
     langToggle: "Switch language",
     langSwitchTo: "বাংলা",
     avatar: "Account",
+    logout: "Sign out",
+  },
+  login: {
+    title: "Sign in",
+    subtitle: "Sign in to your RMG Operations workspace",
+    email: { label: "Email", placeholder: "you@company.com" },
+    password: { label: "Password", placeholder: "Enter your password" },
+    submit: "Sign in",
+    submitting: "Signing in…",
+    errors: {
+      invalidCredentials: "Invalid email or password.",
+      rateLimited: "Too many attempts. Please wait a minute and try again.",
+      network: "Cannot reach the authentication service. Please try again.",
+      generic: "Sign-in failed. Please try again.",
+    },
   },
   dashboard: {
     title: "Dashboard",

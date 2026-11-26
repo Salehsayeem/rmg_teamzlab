@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SearchIcon, UserIcon } from "@/components/icons";
+import { LogoutIcon, SearchIcon, UserIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import type { Dict, Lang } from "@/lib/i18n/getDict";
 
@@ -10,6 +10,13 @@ export function Header({ lang, dict }: { lang: Lang; dict: Dict }) {
   const pathname = usePathname();
   const other: Lang = lang === "en" ? "bn" : "en";
   const langHref = `/${other}${pathname.slice(lang.length + 1)}`;
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    // Full document navigation so the cleared cookie is re-read server-side.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+    window.location.assign(`/${lang}/login`);
+  }
 
   return (
     <header className="sticky top-0 z-10 flex h-[72px] shrink-0 items-center gap-4 border-b border-border bg-background px-6">
@@ -50,6 +57,15 @@ export function Header({ lang, dict }: { lang: Lang; dict: Dict }) {
           className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border text-sidebar-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           <UserIcon />
+        </button>
+        <button
+          type="button"
+          aria-label={dict.header.logout}
+          title={dict.header.logout}
+          onClick={logout}
+          className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border text-sidebar-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
+          <LogoutIcon />
         </button>
       </div>
     </header>

@@ -24,6 +24,21 @@ export const bn: Dict = {
     langToggle: "ভাষা পরিবর্তন",
     langSwitchTo: "EN",
     avatar: "অ্যাকাউন্ট",
+    logout: "সাইন আউট",
+  },
+  login: {
+    title: "সাইন ইন",
+    subtitle: "আপনার RMG অপারেশনস ওয়ার্কস্পেসে সাইন ইন করুন",
+    email: { label: "ইমেইল", placeholder: "you@company.com" },
+    password: { label: "পাসওয়ার্ড", placeholder: "আপনার পাসওয়ার্ড লিখুন" },
+    submit: "সাইন ইন",
+    submitting: "সাইন ইন হচ্ছে…",
+    errors: {
+      invalidCredentials: "ইমেইল বা পাসওয়ার্ড সঠিক নয়।",
+      rateLimited: "অতিরিক্ত চেষ্টা হয়েছে। এক মিনিট অপেক্ষা করে আবার চেষ্টা করুন।",
+      network: "প্রমাণীকরণ সার্ভিসে পৌঁছানো যাচ্ছে না। আবার চেষ্টা করুন।",
+      generic: "সাইন ইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+    },
   },
   dashboard: {
     title: "ড্যাশবোর্ড",
