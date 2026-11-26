@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AlertIcon, PlusIcon } from "@/components/icons";
 import { addLine, createBom, release, type BomActionState } from "@/lib/actions/boms";
@@ -210,6 +210,16 @@ export function ReleasePanel({
   const [state, formAction, pending] = useActionState(release.bind(null, lang, styleId, bomId), INITIAL);
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  // The trigger and the panel are mutually exclusive branches, so the ref is
+  // null while the panel is open; restore focus in an effect after the Cancel
+  // commit remounts the trigger (a direct focus() call in the handler is dead).
+  const restoreFocusRef = useRef(false);
+  useEffect(() => {
+    if (!open && restoreFocusRef.current) {
+      restoreFocusRef.current = false;
+      triggerRef.current?.focus();
+    }
+  }, [open]);
   const reloadHref = `/${lang}/styles/${styleId}/bom`;
 
   return (
@@ -247,8 +257,8 @@ export function ReleasePanel({
               type="button"
               autoFocus
               onClick={() => {
+                restoreFocusRef.current = true;
                 setOpen(false);
-                triggerRef.current?.focus();
               }}
               className="flex h-10 items-center rounded-lg border border-border px-4 text-sm font-medium text-sidebar-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
