@@ -29,3 +29,8 @@ public class ForbiddenProblem(string? Detail = null)
 
 public class BusinessRuleProblem(string Code, string? Detail = null)
     : RmgProblemException(Code, "Business rule violated.", 422, null, Detail);
+
+// W2-a: a write attempted outside the aggregate's allowed state (the state-machine guard on the
+// entities) — the stable INVALID_STATE code the plan names, rendered as a 422 like every rule.
+public class InvalidStateProblem(string? Detail = null)
+    : BusinessRuleProblem("INVALID_STATE", Detail);

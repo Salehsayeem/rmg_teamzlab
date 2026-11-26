@@ -33,5 +33,14 @@ public class TenantScopedDbContext(DbContextOptions<RmgDbContext> options) : Rmg
 
         // Task 11 (PDM): material is tenant-pinned on this context, same as Facility above.
         modelBuilder.Entity<Material>().HasQueryFilter(m => m.TenantId == AmbientTenantId);
+
+        // BEGIN Task 12+13 (PDM): style/version/variant/bom/bom_line tenant-pinned on this context,
+        // same as Facility/AppUser/Material above — additive block only.
+        modelBuilder.Entity<Style>().HasQueryFilter(s => s.TenantId == AmbientTenantId);
+        modelBuilder.Entity<StyleVersion>().HasQueryFilter(v => v.TenantId == AmbientTenantId);
+        modelBuilder.Entity<StyleVariant>().HasQueryFilter(v => v.TenantId == AmbientTenantId);
+        modelBuilder.Entity<Bom>().HasQueryFilter(b => b.TenantId == AmbientTenantId);
+        modelBuilder.Entity<BomLine>().HasQueryFilter(l => l.TenantId == AmbientTenantId);
+        // END Task 12+13 (PDM)
     }
 }
