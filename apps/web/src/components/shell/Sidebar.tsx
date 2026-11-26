@@ -2,24 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  DashboardIcon,
-  LayersIcon,
-  OrdersIcon,
-  ShirtIcon,
-  UsersIcon,
-} from "@/components/icons";
+import { NAV } from "@/components/shell/nav";
 import type { Dict, Lang } from "@/lib/i18n/getDict";
 
 export function Sidebar({ lang, dict }: { lang: Lang; dict: Dict }) {
   const pathname = usePathname();
-  const items = [
-    { href: `/${lang}/dashboard`, label: dict.nav.dashboard, icon: <DashboardIcon /> },
-    { href: `/${lang}/buyers`, label: dict.nav.buyers, icon: <UsersIcon /> },
-    { href: `/${lang}/styles`, label: dict.nav.styles, icon: <ShirtIcon /> },
-    { href: `/${lang}/boms`, label: dict.nav.boms, icon: <LayersIcon /> },
-    { href: `/${lang}/orders`, label: dict.nav.orders, icon: <OrdersIcon /> },
-  ];
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
@@ -34,23 +21,26 @@ export function Sidebar({ lang, dict }: { lang: Lang; dict: Dict }) {
         <span className="text-base font-semibold tracking-tight">{dict.app.name}</span>
       </div>
       <nav aria-label={dict.nav.label} className="flex flex-col gap-1">
-        {items.map(({ href, label, icon }) => (
-          <Link
-            key={href}
-            href={href}
-            aria-current={isActive(href) ? "page" : undefined}
-            className={
-              isActive(href)
-                ? "flex h-10 items-center gap-3 rounded-lg bg-sidebar-primary px-3 text-sm font-medium text-sidebar-primary-foreground transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                : "flex h-10 items-center gap-3 rounded-lg px-3 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        {NAV.map(({ href, dictKey, icon: Icon }) => {
+          const full = `/${lang}${href}`;
+          return (
+            <Link
+              key={href}
+              href={full}
+              aria-current={isActive(full) ? "page" : undefined}
+              className={
+                isActive(full)
+                  ? "flex h-10 items-center gap-3 rounded-lg bg-sidebar-primary px-3 text-sm font-medium text-sidebar-primary-foreground transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  : "flex h-10 items-center gap-3 rounded-lg px-3 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             }
           >
             <span aria-hidden="true" className="shrink-0">
-              {icon}
+              <Icon />
             </span>
-            {label}
+            {dict.nav[dictKey]}
           </Link>
-        ))}
+        );
+      })}
       </nav>
     </aside>
   );
