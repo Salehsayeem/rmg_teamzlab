@@ -45,25 +45,24 @@ export const en = {
     stats: {
       buyers: { label: "Buyers", hint: "Active buyer accounts" },
       styles: { label: "Styles", hint: "Styles in development" },
-      boms: { label: "BOMs", hint: "Released bills of materials" },
       orders: { label: "Orders", hint: "Customer orders this season" },
     },
     recentOrders: {
       title: "Recent orders",
       hint: "Latest customer orders across facilities",
+      empty: "No orders yet",
+      emptyBody: "Captured customer orders will appear here.",
     },
-    table: { order: "Order", buyer: "Buyer", qty: "Qty", status: "Status" },
-    status: { confirmed: "Confirmed", inProduction: "In production", pending: "Pending" },
+    table: { order: "Order", buyer: "Buyer", date: "Order date", amount: "Amount", status: "Status" },
+    status: { draft: "Draft", confirmed: "Confirmed", cancelled: "Cancelled" },
     states: {
       loading: "Loading dashboard…",
-      empty: "No orders yet",
-      emptyBody: "Confirmed customer orders will appear here once capture begins.",
+      empty: "Nothing to show yet",
+      emptyBody: "Create a buyer or a style, and capture an order to get started.",
       error: "Something went wrong",
       errorBody: "The dashboard service is not reachable right now.",
+      retry: "Retry",
     },
-  },
-  common: {
-    valuePlaceholder: "—",
   },
   notFound: {
     title: "Page not found",
