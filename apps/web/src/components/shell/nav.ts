@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { DashboardIcon, LayersIcon, OrdersIcon, ShirtIcon, UsersIcon } from "@/components/icons";
+import { DashboardIcon, OrdersIcon, ShirtIcon, UsersIcon } from "@/components/icons";
 import type { Dict } from "@/lib/i18n/getDict";
 
 /** One sidebar entry: path under /{lang}, its dict.nav label key, and its icon component. */
@@ -18,6 +18,5 @@ export const NAV: NavEntry[] = [
   { href: "/dashboard", dictKey: "dashboard", icon: DashboardIcon },
   { href: "/buyers", dictKey: "buyers", icon: UsersIcon },
   { href: "/styles", dictKey: "styles", icon: ShirtIcon },
-  { href: "/boms", dictKey: "boms", icon: LayersIcon },
   { href: "/orders", dictKey: "orders", icon: OrdersIcon },
 ];
