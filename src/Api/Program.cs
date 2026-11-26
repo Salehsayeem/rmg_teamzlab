@@ -110,6 +110,15 @@ builder.Services.AddPdmApi();
 // src/Api/Controllers (plan convention) — discovered from the entry assembly. ──
 builder.Services.AddControllers();
 
+// BEGIN Task 15 (contract): OpenAPI export — AddEndpointsApiExplorer surfaces the minimal-API login
+// endpoint through ApiExplorer alongside the MVC controllers, so OpenApiExport.cs can generate the
+// whole pilot document (the pinned stack carries no Microsoft.AspNetCore.OpenApi package; the
+// generator walks ApiExplorer instead). GET /openapi/v1.json is mapped Development-only after
+// MapControllers; scripts/export-openapi.ps1 snapshots the document into
+// contracts/openapi/openapi.json, and tests/Contract asserts the live document matches it.
+builder.Services.AddEndpointsApiExplorer();
+// END Task 15
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -129,6 +138,11 @@ app.MapAuthProbeEndpoints();
 app.MapControllers().AddEndpointFilter<Microsoft.AspNetCore.Builder.ControllerActionEndpointConventionBuilder,
     Rmg.BuildingBlocks.Idempotency.IdempotencyFilter>();
 // END Task 14 (ORD)
+
+// BEGIN Task 15 (contract): Development-only OpenAPI document (see the Task 15 block at AddControllers).
+if (app.Environment.IsDevelopment())
+    app.MapOpenApiExport();
+// END Task 15
 
 // ── Task 7 (guard): TenantEntity's query filter reads the ambient tenant — mirror it from
 // ITenantContext once TenantResolutionMiddleware has populated it — plus the guard probe endpoints.
