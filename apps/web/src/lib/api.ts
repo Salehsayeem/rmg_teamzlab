@@ -10,6 +10,8 @@ export class ApiError extends Error {
     readonly status: number,
     readonly code: string,
     readonly errors: string[] = [],
+    /** Field-keyed messages from VALIDATION_FAILED (`errors` as an object, e.g. `{code: [...]}`). */
+    readonly fieldErrors: Record<string, string[]> = {},
   ) {
     super(code);
     this.name = "ApiError";
@@ -42,10 +44,18 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<Api
       title?: string;
       errors?: unknown;
     } | null;
-    const errors = Array.isArray(problem?.errors)
-      ? problem.errors.map((e) => (typeof e === "string" ? e : JSON.stringify(e)))
+    const raw = problem?.errors;
+    const errors = Array.isArray(raw)
+      ? raw.map((e) => (typeof e === "string" ? e : JSON.stringify(e)))
       : [];
-    throw new ApiError(res.status, problem?.code ?? problem?.title ?? "UNKNOWN", errors);
+    // VALIDATION_FAILED sends errors as a field -> messages object; keep both shapes.
+    const fieldErrors =
+      raw && typeof raw === "object" && !Array.isArray(raw)
+        ? Object.fromEntries(
+            Object.entries(raw).filter((entry): entry is [string, string[]] => Array.isArray(entry[1])),
+          )
+        : {};
+    throw new ApiError(res.status, problem?.code ?? problem?.title ?? "UNKNOWN", errors, fieldErrors);
   }
 
   const envelope = (await res.json()) as { data?: T; meta?: Record<string, unknown> };
