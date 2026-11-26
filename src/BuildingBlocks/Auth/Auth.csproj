@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\Domain\Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- AuthorizeAttribute/AuthorizationHandler/PasswordHasher/JwtBearer events live in the shared framework. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Rmg.BuildingBlocks.Auth</RootNamespace>
+</PropertyGroup>
+
+</Project>

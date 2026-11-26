@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Audit\Audit.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Common\Common.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Outbox\Outbox.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Tenancy\Tenancy.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Rmg.Modules.Merchandising.Application</RootNamespace>
+    <AssemblyName>Rmg.Modules.Merchandising.Application</AssemblyName>
+</PropertyGroup>
+
+</Project>

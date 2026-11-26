@@ -1,0 +1,1307 @@
+{
+  "components": {
+    "schemas": {
+      "BomCreateRequest": {
+        "properties": {
+          "StyleVersionId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "StyleVersionId"
+        ],
+        "type": "object"
+      },
+      "BomLineAddRequest": {
+        "properties": {
+          "MaterialId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "QtyPerUnit": {
+            "format": "double",
+            "type": "number"
+          },
+          "UomCode": {
+            "type": "string"
+          },
+          "WastePct": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "MaterialId",
+          "QtyPerUnit",
+          "UomCode"
+        ],
+        "type": "object"
+      },
+      "BuyerCreateRequest": {
+        "properties": {
+          "Code": {
+            "type": "string"
+          },
+          "Contacts": {
+            "items": {
+              "$ref": "#/components/schemas/ContactInput"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "Country": {
+            "type": "string"
+          },
+          "Currency": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Code",
+          "Country",
+          "Currency",
+          "Name"
+        ],
+        "type": "object"
+      },
+      "ContactInput": {
+        "properties": {
+          "Email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Phone": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name"
+        ],
+        "type": "object"
+      },
+      "EnvelopeOfListOfRoleDto": {
+        "properties": {
+          "Data": {
+            "items": {
+              "$ref": "#/components/schemas/RoleDto"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "Meta": {
+            "additionalProperties": {},
+            "nullable": true,
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "EnvelopeOfListOfUserDto": {
+        "properties": {
+          "Data": {
+            "items": {
+              "$ref": "#/components/schemas/UserDto"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "Meta": {
+            "additionalProperties": {},
+            "nullable": true,
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "EnvelopeOfLoginResult": {
+        "properties": {
+          "Data": {
+            "$ref": "#/components/schemas/LoginResult",
+            "nullable": true
+          },
+          "Meta": {
+            "additionalProperties": {},
+            "nullable": true,
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "EnvelopeOfUserDto": {
+        "properties": {
+          "Data": {
+            "$ref": "#/components/schemas/UserDto",
+            "nullable": true
+          },
+          "Meta": {
+            "additionalProperties": {},
+            "nullable": true,
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "LoginRequest": {
+        "properties": {
+          "Email": {
+            "type": "string"
+          },
+          "Password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Email",
+          "Password"
+        ],
+        "type": "object"
+      },
+      "LoginResult": {
+        "properties": {
+          "AccessToken": {
+            "type": "string"
+          },
+          "ExpiresInSeconds": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "User": {
+            "$ref": "#/components/schemas/LoginUserSummary"
+          }
+        },
+        "required": [
+          "AccessToken",
+          "ExpiresInSeconds",
+          "User"
+        ],
+        "type": "object"
+      },
+      "LoginUserSummary": {
+        "properties": {
+          "DisplayName": {
+            "type": "string"
+          },
+          "Id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "DisplayName",
+          "Id"
+        ],
+        "type": "object"
+      },
+      "MaterialCreateRequest": {
+        "properties": {
+          "BaseUomCode": {
+            "type": "string"
+          },
+          "Category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "Code": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "BaseUomCode",
+          "Code",
+          "Name"
+        ],
+        "type": "object"
+      },
+      "OrderCancelRequest": {
+        "properties": {
+          "Reason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OrderConfirmRequest": {
+        "properties": {
+          "ExpectedRevision": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ExpectedRevision"
+        ],
+        "type": "object"
+      },
+      "OrderCreateRequest": {
+        "properties": {
+          "BuyerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "BuyerPo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "Code": {
+            "nullable": true,
+            "type": "string"
+          },
+          "Currency": {
+            "nullable": true,
+            "type": "string"
+          },
+          "Lines": {
+            "items": {
+              "$ref": "#/components/schemas/OrderLineInput"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "OrderDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "BuyerId",
+          "OrderDate"
+        ],
+        "type": "object"
+      },
+      "OrderLineInput": {
+        "properties": {
+          "Price": {
+            "format": "double",
+            "type": "number"
+          },
+          "Schedules": {
+            "items": {
+              "$ref": "#/components/schemas/OrderScheduleInput"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "Sizes": {
+            "items": {
+              "$ref": "#/components/schemas/OrderSizeInput"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "StyleVersionId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Price",
+          "StyleVersionId"
+        ],
+        "type": "object"
+      },
+      "OrderScheduleInput": {
+        "properties": {
+          "Qty": {
+            "format": "double",
+            "type": "number"
+          },
+          "ShipDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Qty",
+          "ShipDate"
+        ],
+        "type": "object"
+      },
+      "OrderSizeInput": {
+        "properties": {
+          "ColorCode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "Qty": {
+            "format": "double",
+            "type": "number"
+          },
+          "SizeCode": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "Qty"
+        ],
+        "type": "object"
+      },
+      "ProblemDetails": {
+        "properties": {
+          "code": {
+            "description": "stable machine-readable error code",
+            "type": "string"
+          },
+          "correlationId": {
+            "description": "correlation id echoed by CorrelationMiddleware",
+            "type": "string"
+          },
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "errors": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "description": "per-field validation messages, when the problem is a validation failure",
+            "type": "object"
+          },
+          "instance": {
+            "format": "uri-reference",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "nullable": true,
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RoleDto": {
+        "properties": {
+          "Code": {
+            "type": "string"
+          },
+          "Id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Code",
+          "Id"
+        ],
+        "type": "object"
+      },
+      "SetUserRolesRequest": {
+        "properties": {
+          "RoleCodes": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "StyleCreateRequest": {
+        "properties": {
+          "BuyerId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "Category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "Code": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Season": {
+            "nullable": true,
+            "type": "string"
+          },
+          "Variants": {
+            "items": {
+              "$ref": "#/components/schemas/StyleVariantInput"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "BuyerId",
+          "Code",
+          "Name"
+        ],
+        "type": "object"
+      },
+      "StyleVariantInput": {
+        "properties": {
+          "ColorCode": {
+            "type": "string"
+          },
+          "SizeCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ColorCode",
+          "SizeCode"
+        ],
+        "type": "object"
+      },
+      "UserCreateRequest": {
+        "properties": {
+          "DisplayName": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Password": {
+            "type": "string"
+          },
+          "RoleCodes": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "DisplayName",
+          "Email",
+          "Password"
+        ],
+        "type": "object"
+      },
+      "UserDto": {
+        "properties": {
+          "DisplayName": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "IsActive": {
+            "type": "boolean"
+          },
+          "Roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "DisplayName",
+          "Email",
+          "Id",
+          "IsActive",
+          "Roles"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "RMG platform pilot API — {data, meta} envelope on success, RFC 9457 problem+json on errors.",
+    "title": "Rmg.Api",
+    "version": "v1"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "PostAuthLogin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeOfLoginResult"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/iam/roles": {
+      "get": {
+        "operationId": "GetIamRoles",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeOfListOfRoleDto"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/iam/users": {
+      "get": {
+        "operationId": "GetIamUsers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeOfListOfUserDto"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostIamUsers",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeOfUserDto"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/iam/users/{id}/roles": {
+      "post": {
+        "operationId": "PostIamUsersByIdRoles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserRolesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeOfUserDto"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/ord/buyers": {
+      "get": {
+        "operationId": "GetOrdBuyers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostOrdBuyers",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyerCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/ord/buyers/{id}": {
+      "get": {
+        "operationId": "GetOrdBuyersById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/ord/customer-orders": {
+      "get": {
+        "operationId": "GetOrdCustomerOrders",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostOrdCustomerOrders",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/ord/customer-orders/{id}": {
+      "get": {
+        "operationId": "GetOrdCustomerOrdersById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/ord/customer-orders/{id}/cancel": {
+      "post": {
+        "operationId": "PostOrdCustomerOrdersByIdCancel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/ord/customer-orders/{id}/confirm": {
+      "post": {
+        "operationId": "PostOrdCustomerOrdersByIdConfirm",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderConfirmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/org/facilities": {
+      "get": {
+        "operationId": "GetOrgFacilities",
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/org/facilities/{id}": {
+      "get": {
+        "operationId": "GetOrgFacilitiesById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/pdm/boms": {
+      "get": {
+        "operationId": "GetPdmBoms",
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostPdmBoms",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BomCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/pdm/boms/{id}": {
+      "get": {
+        "operationId": "GetPdmBomsById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/pdm/boms/{id}/approve": {
+      "post": {
+        "operationId": "PostPdmBomsByIdApprove",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/pdm/boms/{id}/lines": {
+      "post": {
+        "operationId": "PostPdmBomsByIdLines",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BomLineAddRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/pdm/materials": {
+      "get": {
+        "operationId": "GetPdmMaterials",
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostPdmMaterials",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaterialCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/pdm/styles": {
+      "get": {
+        "operationId": "GetPdmStyles",
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostPdmStyles",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StyleCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/pdm/styles/{id}": {
+      "get": {
+        "operationId": "GetPdmStylesById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/pdm/styles/{id}/approve": {
+      "post": {
+        "operationId": "PostPdmStylesByIdApprove",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    },
+    "/api/v1/pdm/uoms": {
+      "get": {
+        "operationId": "GetPdmUoms",
+        "responses": {
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Error — RFC 9457 problem+json (code, errors[], correlationId)"
+          }
+        }
+      }
+    }
+  }
+}

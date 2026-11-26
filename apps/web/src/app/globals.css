@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+/* Class strategy: the .dark block below + dark: utilities key off the html class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens — transcribed from website-analysis/design-tokens.json
+ * (tailwindadmin reference), shadcn-style. Light values on :root, dark
+ * overrides on .dark (class strategy on <html>, persisted as `rmg-theme`).
+ * Synced with docs/design/ui-direction.md — update both in the same commit.
+ */
+
+:root {
+  /* surfaces + text */
+  --background: #ffffff;
+  --foreground: #1c2536;
+  --card: #ffffff;
+  --card-foreground: #1c2536;
+  --popover: #ffffff;
+  --popover-foreground: #1c2536;
+  --muted: #f5f5f5;
+  --muted-foreground: rgba(90, 106, 133, 0.75);
+
+  /* brand */
+  --primary: #5d87ff;
+  /* dark navy, not white: 4.66:1 on #5d87ff (white is 3.29:1 — below the 4.5 floor) */
+  --primary-foreground: #1c2536;
+  --secondary: #49beff;
+  --secondary-foreground: #ffffff;
+  --accent: var(--lightprimary);
+  --accent-foreground: var(--primary);
+
+  /* status */
+  --success: #13deb9;
+  --warning: #f6b51e;
+  --error: #ef4444;
+  --info: #8754ec;
+  --destructive: var(--error);
+  --destructive-foreground: #ffffff;
+
+  /* tint aliases — 10–20% semantic fills for stat tiles / badges (reference
+     applies these exact alphas: primary 16.5%, secondary/error 20%, rest 10%) */
+  --lightprimary: rgba(93, 135, 255, 0.165);
+  --lightsecondary: rgba(73, 190, 255, 0.2);
+  --lightsuccess: rgba(19, 222, 185, 0.1);
+  --lightwarning: rgba(246, 181, 30, 0.1);
+  --lighterror: rgba(239, 68, 68, 0.2);
+  --lightinfo: rgba(135, 84, 236, 0.1);
+
+  /* lines */
+  --border: #dfe5ef;
+  --input: #e5e7eb;
+  --ring: var(--primary);
+
+  /* charts map 1:1 to brand/status */
+  --chart-1: var(--primary);
+  --chart-2: var(--secondary);
+  --chart-3: var(--success);
+  --chart-4: var(--warning);
+  --chart-5: var(--error);
+
+  /* sidebar */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #2a3547;
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: #1c2536;
+  --sidebar-accent: var(--lightprimary);
+  --sidebar-accent-foreground: var(--primary);
+  --sidebar-border: var(--border);
+  --sidebar-ring: #a1a1a1;
+
+  --radius: 10px;
+}
+
+/* Brand, status, tint, chart and ring tokens are theme-invariant (identical in
+   the reference dark block); only surfaces, text and lines flip. */
+.dark {
+  --background: #1c2536;
+  --foreground: #ffffff;
+  --card: #1c2536;
+  --card-foreground: #ffffff;
+  --popover: #333f55;
+  --popover-foreground: #ffffff;
+  --muted: #2a3851;
+  --muted-foreground: #7c8fac;
+  --border: #333f55;
+  --input: var(--border);
+  --sidebar: #1c2536;
+  --sidebar-foreground: #7c8fac;
+  --sidebar-border: var(--border);
+  /* explicit: text on primary fills is dark navy in both themes (a11y floor) */
+  --primary-foreground: #1c2536;
+  --sidebar-primary-foreground: #1c2536;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-lightprimary: var(--lightprimary);
+  --color-lightsecondary: var(--lightsecondary);
+  --color-lightsuccess: var(--lightsuccess);
+  --color-lightwarning: var(--lightwarning);
+  --color-lighterror: var(--lighterror);
+  --color-lightinfo: var(--lightinfo);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  /* DM Sans (latin) with Noto Sans Bengali fallback for bn glyphs */
+  --font-sans: var(--font-dm-sans), var(--font-noto-bengali), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 20px;
+  }
+}

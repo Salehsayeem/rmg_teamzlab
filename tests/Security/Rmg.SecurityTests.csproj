@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="11.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Api\Api.csproj" />
+    <ProjectReference Include="..\..\src\Database\Database.csproj" />
+    <ProjectReference Include="..\..\src\Workers\Workers.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\Common\Common.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\Tenancy\Tenancy.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\Auth\Auth.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\Outbox\Outbox.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\Audit\Audit.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\Idempotency\Idempotency.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Identity\Application\Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Identity\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Identity\Domain\Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Identity\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Merchandising\Application\Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Merchandising\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Merchandising\Domain\Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Merchandising\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Organization\Application\Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Organization\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Organization\Domain\Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Organization\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\ProductEngineering\Application\Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\ProductEngineering\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\ProductEngineering\Domain\Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\ProductEngineering\Infrastructure\Infrastructure.csproj" />
+    <!-- Shares the IntegrationTestBase harness + two-tenant seed; this project's tests stay the only ones discovered. -->
+    <ProjectReference Include="..\Integration\Rmg.IntegrationTests.csproj" />
+  </ItemGroup>
+
+</Project>
