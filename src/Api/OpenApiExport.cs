@@ -151,7 +151,10 @@ public static class OpenApiExport
                      .Where(t => t.Type is not null && t.Type != typeof(void))
                      .OrderBy(t => t.StatusCode))
         {
-            var mediaType = responseType.ApiResponseFormats.FirstOrDefault()?.MediaType ?? "application/json";
+            // ApiExplorer's first declared format can be text/plain for actions without [Produces],
+            // while these endpoints actually return JSON envelopes — prefer application/json.
+            var mediaType = (responseType.ApiResponseFormats.FirstOrDefault(f => f.MediaType == "application/json")
+                ?? responseType.ApiResponseFormats.FirstOrDefault())?.MediaType ?? "application/json";
             responses[responseType.StatusCode.ToString()] = new JsonObject
             {
                 ["description"] = responseType.StatusCode is >= 200 and < 300 ? "Success" : "Error",

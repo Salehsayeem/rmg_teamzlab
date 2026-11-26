@@ -580,7 +580,7 @@
         "responses": {
           "200": {
             "content": {
-              "text/plain": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EnvelopeOfListOfRoleDto"
                 }
@@ -607,7 +607,7 @@
         "responses": {
           "200": {
             "content": {
-              "text/plain": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EnvelopeOfListOfUserDto"
                 }
@@ -642,7 +642,7 @@
         "responses": {
           "200": {
             "content": {
-              "text/plain": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EnvelopeOfUserDto"
                 }
@@ -690,7 +690,7 @@
         "responses": {
           "200": {
             "content": {
-              "text/plain": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EnvelopeOfUserDto"
                 }
