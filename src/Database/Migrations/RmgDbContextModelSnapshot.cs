@@ -740,6 +740,143 @@ namespace Rmg.Database.Migrations
                     b.ToTable("tenant_locale_policy", "org");
                 });
 
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.Bom", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("Revision")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("revision");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("StyleVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("style_version_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "StyleVersionId")
+                        .IsUnique();
+
+                    b.ToTable("bom", "pdm", t =>
+                        {
+                            t.HasCheckConstraint("ck_bom_status", "status IN ('Draft', 'Released')");
+                        });
+                });
+
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.BomLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BomId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("bom_id");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("material_id");
+
+                    b.Property<decimal>("QtyPerUnit")
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("qty_per_unit");
+
+                    b.Property<int>("Revision")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("revision");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("UomCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("uom_code");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<decimal>("WastePct")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(5,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("waste_pct");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UomCode");
+
+                    b.HasIndex("TenantId", "BomId");
+
+                    b.HasIndex("TenantId", "MaterialId");
+
+                    b.ToTable("bom_line", "pdm", t =>
+                        {
+                            t.HasCheckConstraint("ck_bom_line_qty_positive", "qty_per_unit > 0");
+                        });
+                });
+
             modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.Material", b =>
                 {
                     b.Property<Guid>("Id")
@@ -807,6 +944,214 @@ namespace Rmg.Database.Migrations
                         .IsUnique();
 
                     b.ToTable("material", "pdm");
+                });
+
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.Style", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BuyerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("buyer_id");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Revision")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("revision");
+
+                    b.Property<string>("Season")
+                        .HasColumnType("text")
+                        .HasColumnName("season");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("style", "pdm", t =>
+                        {
+                            t.HasCheckConstraint("ck_style_status", "status IN ('Draft', 'Approved')");
+                        });
+                });
+
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.StyleVariant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ColorCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("color_code");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("Revision")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("revision");
+
+                    b.Property<string>("SizeCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("size_code");
+
+                    b.Property<Guid>("StyleVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("style_version_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "StyleVersionId", "ColorCode", "SizeCode")
+                        .IsUnique();
+
+                    b.ToTable("style_variant", "pdm");
+                });
+
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.StyleVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("ApprovedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("approved_at_utc");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("Revision")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("revision");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("StyleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("style_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "StyleId", "Version")
+                        .IsUnique();
+
+                    b.ToTable("style_version", "pdm", t =>
+                        {
+                            t.HasCheckConstraint("ck_style_version_status", "status IN ('Draft', 'Approved', 'Superseded')");
+                        });
                 });
 
             modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.Uom", b =>
@@ -895,11 +1240,64 @@ namespace Rmg.Database.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.Bom", b =>
+                {
+                    b.HasOne("Rmg.Modules.ProductEngineering.Domain.StyleVersion", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "StyleVersionId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.BomLine", b =>
+                {
+                    b.HasOne("Rmg.Modules.ProductEngineering.Domain.Uom", null)
+                        .WithMany()
+                        .HasForeignKey("UomCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Rmg.Modules.ProductEngineering.Domain.Bom", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "BomId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Rmg.Modules.ProductEngineering.Domain.Material", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "MaterialId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.Material", b =>
                 {
                     b.HasOne("Rmg.Modules.ProductEngineering.Domain.Uom", null)
                         .WithMany()
                         .HasForeignKey("BaseUomCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.StyleVariant", b =>
+                {
+                    b.HasOne("Rmg.Modules.ProductEngineering.Domain.StyleVersion", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "StyleVersionId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Rmg.Modules.ProductEngineering.Domain.StyleVersion", b =>
+                {
+                    b.HasOne("Rmg.Modules.ProductEngineering.Domain.Style", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId", "StyleId")
+                        .HasPrincipalKey("TenantId", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -9,5 +9,10 @@ public static class PdmConfig
 {
     public static IServiceCollection AddPdmApi(this IServiceCollection services) =>
         services.AddScoped<IMaterialRepository, MaterialRepository>()
-            .AddScoped<IPdmApi, MaterialService>();
+            .AddScoped<IPdmApi, MaterialService>()
+            // Task 12+13 (styles/variants/BOM): same additive registration pattern.
+            .AddScoped<IStyleRepository, StyleRepository>()
+            .AddScoped<IStyleApi, StyleService>()
+            .AddScoped<IBomRepository, BomRepository>()
+            .AddScoped<IBomApi, BomService>();
 }
