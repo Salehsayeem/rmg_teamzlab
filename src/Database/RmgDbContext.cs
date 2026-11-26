@@ -3,6 +3,7 @@ using Rmg.BuildingBlocks.Audit;
 using Rmg.BuildingBlocks.Idempotency;
 using Rmg.BuildingBlocks.Outbox;
 using Rmg.Modules.Identity.Infrastructure;
+using Rmg.Modules.Merchandising.Infrastructure;
 using Rmg.Modules.Organization.Infrastructure;
 using Rmg.Modules.ProductEngineering.Infrastructure;
 
@@ -13,10 +14,11 @@ public class RmgDbContext(DbContextOptions<RmgDbContext> options) : DbContext(op
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Compose the model from every module Infrastructure assembly + the BuildingBlocks ones.
-        // Assemblies without configurations yet (Merchandising/ProductEngineering) are wired by their own tasks.
+        // Compose the model from every module Infrastructure assembly + the BuildingBlocks ones
+        // (each assembly is wired additively by the task that first owns its configurations).
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TenantConfiguration).Assembly);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppUserConfiguration).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(BuyerConfiguration).Assembly);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OutboxMessageConfiguration).Assembly);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AuditEventConfiguration).Assembly);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(IdempotencyRecordConfiguration).Assembly);

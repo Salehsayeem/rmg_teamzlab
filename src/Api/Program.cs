@@ -13,6 +13,7 @@ using Rmg.BuildingBlocks.Outbox;
 using Rmg.BuildingBlocks.Tenancy;
 using Rmg.Database;
 using Rmg.Modules.Identity.Infrastructure;
+using Rmg.Modules.Merchandising.Infrastructure;
 using Rmg.Modules.Organization.Infrastructure;
 using Rmg.Modules.ProductEngineering.Infrastructure;
 
@@ -95,6 +96,10 @@ builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<TenantScopedDb
 // (replaces FacilityConfig.CreateApi and IamController's per-request property getters). ──
 builder.Services.AddOrganizationApi();
 builder.Services.AddIamApi();
+
+// BEGIN Task 10 (ORD): buyer module DI composition (MerchandisingConfig).
+builder.Services.AddMerchandisingApi();
+// END Task 10 (ORD)
 
 // BEGIN Task 11 (PDM): material master + uom — controllers receive ctor-injected module services
 // (mirrors the W1 module composition blocks above).
