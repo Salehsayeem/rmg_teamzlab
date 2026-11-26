@@ -367,4 +367,8 @@ export const en = {
       scheduleHalf: "Each schedule row needs both a ship date and a quantity.",
     },
   },
+  mobileNav: {
+    open: "Open menu",
+    close: "Close menu",
+  },
 };

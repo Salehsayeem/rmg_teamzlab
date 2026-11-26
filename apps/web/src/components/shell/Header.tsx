@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoutIcon, SearchIcon, UserIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { MobileNav } from "@/components/shell/MobileNav";
 import type { Dict, Lang } from "@/lib/i18n/getDict";
 
 export function Header({ lang, dict }: { lang: Lang; dict: Dict }) {
@@ -20,6 +21,7 @@ export function Header({ lang, dict }: { lang: Lang; dict: Dict }) {
 
   return (
     <header className="sticky top-0 z-10 flex h-[72px] shrink-0 items-center gap-4 border-b border-border bg-background px-6">
+      <MobileNav lang={lang} dict={dict} />
       <form role="search" className="min-w-0 flex-1">
         <label htmlFor="global-search" className="sr-only">
           {dict.header.searchLabel}
