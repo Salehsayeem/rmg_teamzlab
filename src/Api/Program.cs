@@ -18,12 +18,21 @@ using Rmg.Modules.Organization.Infrastructure;
 using Rmg.Modules.ProductEngineering.Infrastructure;
 
 // Local config comes from the gitignored .env (connection string, JWT key, seed password, ports).
-// Walked up from cwd because dotnet run / IIS Express don't guarantee cwd = repo root.
-for (var dir = new DirectoryInfo(Directory.GetCurrentDirectory()); dir is not null; dir = dir.Parent)
+// RMG_ENV_FILE wins when set (isolated boots: smoke/E2E scratch runs); otherwise walk up from cwd.
+// The walk-up is needed because dotnet run / dotnet-ef launch with cwd = project dir, not repo root.
+var envFile = Environment.GetEnvironmentVariable("RMG_ENV_FILE");
+if (envFile is not null)
 {
-    if (!File.Exists(Path.Combine(dir.FullName, ".env"))) continue;
-    DotNetEnv.Env.Load(Path.Combine(dir.FullName, ".env"));
-    break;
+    DotNetEnv.Env.Load(envFile);
+}
+else
+{
+    for (var dir = new DirectoryInfo(Directory.GetCurrentDirectory()); dir is not null; dir = dir.Parent)
+    {
+        if (!File.Exists(Path.Combine(dir.FullName, ".env"))) continue;
+        DotNetEnv.Env.Load(Path.Combine(dir.FullName, ".env"));
+        break;
+    }
 }
 
 var builder = WebApplication.CreateBuilder(args);

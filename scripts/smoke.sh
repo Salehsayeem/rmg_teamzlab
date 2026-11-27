@@ -5,11 +5,12 @@
 # probes expecting 4xx, then tear everything down. Non-zero exit on any probe
 # mismatch.
 #
-# Scratch isolation: the API process gets a temp-dir .env (its config walk-up
-# finds it first — env-var prefixes do NOT beat a .env), so this works from any
-# checkout regardless of what the repo .env targets. The dev DB rmg_teamzlab is
-# never touched. API on :5101 (SMOKE_API_URL overrides). Do not run concurrently
-# with the E2E harness — both use rmg_t23_scratch.
+# Scratch isolation: the API gets RMG_ENV_FILE pointing at a temp-dir .env.
+# (cwd tricks don't work: dotnet run launches Web SDK apps with cwd = project
+# dir, so the boot walk-up would find the checkout's own .env — env-var
+# prefixes do NOT beat a loaded .env either.) Works from any checkout; the dev
+# DB rmg_teamzlab is never touched. API on :5101 (SMOKE_API_URL overrides). Do
+# not run concurrently with the E2E harness — both use rmg_t23_scratch.
 set -u
 cd "$(dirname "$0")/.." || exit 1
 REPO="$(pwd)"
@@ -65,15 +66,15 @@ TMPENV="$(mktemp -d)" || exit 1
 echo "== boot: scratch DB $DB + API on $API_URL =="
 curl -s -o /dev/null --max-time 2 "$API_URL/" && { echo "FAIL: $API_URL already in use — free it or set SMOKE_API_URL"; exit 1; }
 
-# The API's .env walk-up starts at cwd, so a temp dir holding a scratch .env
-# isolates it from whatever the checkout's own .env targets.
+# The scratch .env is passed explicitly via RMG_ENV_FILE — see the header note
+# on why cwd-based isolation is unreliable under dotnet run.
 printf 'ConnectionStrings__Default=%s\nJwt__Key=%s\nSeed__AdminPassword=%s\n' "$CS" "$JWTKEY" "$SEEDPW" > "$TMPENV/.env"
 
 PG postgres "DROP DATABASE IF EXISTS $DB WITH (FORCE)" >/dev/null || exit 1
 ConnectionStrings__Default="$CS" dotnet ef database update --project src/Database --context RmgDbContext >/dev/null || { echo "FAIL: migrate"; exit 1; }
 
 cd "$TMPENV"
-ASPNETCORE_ENVIRONMENT=Development dotnet run --project "$REPO/src/Api" --no-launch-profile --urls "$API_URL" >/dev/null 2>&1 &
+RMG_ENV_FILE="$TMPENV/.env" ASPNETCORE_ENVIRONMENT=Development dotnet run --project "$REPO/src/Api" --no-launch-profile --urls "$API_URL" >/dev/null 2>&1 &
 API_PID=$!
 cd "$REPO"
 
