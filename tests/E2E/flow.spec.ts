@@ -160,12 +160,13 @@ test.describe("pilot journey", () => {
       });
 
       // Negative probe on the orders route: a junk id must surface a 404 page,
-      // never a 500 (cross-tenant junk behaves as missing). Next's built-in 404
-      // renders today — the app's dict.notFound copy would need a
-      // [lang]/not-found.tsx boundary (product gap, noted in the T23 report).
-      test("unknown order id renders not-found", async ({ page }) => {
+      // never a 500 (cross-tenant junk behaves as missing). Asserts the app's
+      // [lang]/not-found.tsx boundary: localized copy per segment locale.
+      test("unknown order id renders localized not-found", async ({ page }) => {
         await page.goto("/en/orders/00000000-0000-0000-0000-000000000000");
-        await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
+        await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+        await page.goto("/bn/orders/00000000-0000-0000-0000-000000000000");
+        await expect(page.getByRole("heading", { name: "পৃষ্ঠাটি পাওয়া যায়নি" })).toBeVisible();
       });
     });
   });
