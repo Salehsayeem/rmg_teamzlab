@@ -12,9 +12,10 @@ import { API_URL, WEB_URL } from "./playwright.config";
  * mid-setup leaves nothing behind (the net is removed once setup succeeds;
  * from there global-teardown owns the cleanup).
  *
- * Scratch DB comes from the repo-root (worktree) .env, ConnectionStrings__Default,
- * which MUST point at rmg_t23_scratch — the guard below refuses to run against
- * anything else (the dev database rmg_teamzlab is never touched).
+ * Credentials come from the repo-root .env, but the database is FORCED to
+ * rmg_t23_scratch: a temp .env (RMG_ENV_FILE for the API, env var for
+ * dotnet-ef) carries the scratch connection string, so the suite runs from any
+ * checkout and the dev database is never touched.
  */
 
 const ROOT = path.resolve(__dirname, "..", ".."); // tests/E2E → repo root (the worktree)
@@ -39,19 +40,25 @@ function readEnv(): Record<string, string> {
 
 type Conn = { host: string; port: string; user: string; password: string; database: string };
 
-function parseConn(cs: string): Conn {
+/** Credentials come from the checkout's .env; the database is forced to
+ * rmg_t23_scratch so the suite never touches the dev database, whatever the
+ * checkout's own .env targets. */
+function scratchConn(cs: string): Conn {
   const get = (k: string) => new RegExp(`${k}=([^;]*)`).exec(cs)?.[1] ?? "";
   const conn = {
     host: get("Host") || "localhost",
     port: get("Port") || "5432",
     user: get("Username") || "postgres",
     password: get("Password"),
-    database: get("Database"),
+    database: "rmg_t23_scratch",
   };
-  if (conn.database !== "rmg_t23_scratch")
-    throw new Error(`Refusing to run: the scratch .env must target rmg_t23_scratch, got "${conn.database}".`);
+  if (!conn.password)
+    throw new Error("ConnectionStrings__Default has no Password — cannot build the scratch connection string.");
   return conn;
 }
+
+const toCs = (c: Conn): string =>
+  `Host=${c.host};Port=${c.port};Database=${c.database};Username=${c.user};Password=${c.password}`;
 
 function findPsql(): string {
   const base = "C:/Program Files/PostgreSQL";
@@ -150,13 +157,26 @@ function writeLedger(entry: { api?: number; web?: number; conn: Conn }): void {
 
 export default async function globalSetup(): Promise<void> {
   const env = readEnv();
-  const conn = parseConn(env["ConnectionStrings__Default"] ?? "");
+  const conn = scratchConn(env["ConnectionStrings__Default"] ?? "");
   mkdirSync(RUN_DIR, { recursive: true });
 
   // Self-heal a previous aborted run (ledger present ⇒ its teardown never ran).
   if (existsSync(SERVERS_FILE)) teardown();
   await assertPortFree(apiPort, "API");
   await assertPortFree(webPort, "web");
+
+  // Scratch .env — written after the self-heal (teardown wipes RUN_DIR) and
+  // wiped with it at the end. RMG_ENV_FILE beats any cwd-based .env walk-up.
+  const scratchEnvPath = path.join(RUN_DIR, ".env");
+  writeFileSync(
+    scratchEnvPath,
+    [
+      `ConnectionStrings__Default=${toCs(conn)}`,
+      `Jwt__Key=${env["Jwt__Key"] || "dev-only-secret-key-change-me-32chars-min!"}`,
+      `Seed__AdminPassword=${env["Seed__AdminPassword"] || "Admin#12345"}`,
+      "",
+    ].join("\n"),
+  );
 
   // Crash nets — only while setup is in flight (removed on success below).
   process.on("exit", teardown);
@@ -170,13 +190,14 @@ export default async function globalSetup(): Promise<void> {
     execSync("dotnet ef database update --project src/Database --context RmgDbContext", {
       cwd: ROOT,
       stdio: "inherit",
-      env: { ...process.env, ASPNETCORE_ENVIRONMENT: "Development" },
+      env: { ...process.env, ASPNETCORE_ENVIRONMENT: "Development", ConnectionStrings__Default: toCs(conn) },
     });
 
     // API: Development env (explicit here; --no-launch-profile keeps ports deterministic)
     // installs the pilot seed + spec §8 demo dataset idempotently on boot.
     const api = spawnServer("dotnet", ["run", "--project", "src/Api", "--no-launch-profile", "--urls", API_URL], ROOT, {
       ASPNETCORE_ENVIRONMENT: "Development",
+      RMG_ENV_FILE: scratchEnvPath,
     });
     writeLedger({ api: api.pid, conn });
     await waitReady(`${API_URL}/`, "API", 180_000);
